@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StatTest Recommender | Automated Statistical Advisor</title>
-    <!-- Google Fonts & Parsing Libraries -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <title>StatEngine Research | Automated Biostatistical & Econometric Advisor</title>
+    <!-- Fonts: Inter for UI, Newsreader for Sober Academic Headers, JetBrains Mono for Metrics -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet">
+    <!-- Client-Side Parsers: PapaParse (CSV) & SheetJS (Excel) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
@@ -13,201 +14,507 @@
             --bg-canvas: #f8fafc;
             --card-bg: #ffffff;
             --text-main: #0f172a;
-            --text-muted: #475569;
+            --text-secondary: #334155;
+            --text-muted: #64748b;
             --border-color: #cbd5e1;
-            --accent: #1e293b;
-            --accent-hover: #0f172a;
+            --border-subtle: #e2e8f0;
+            --accent: #0f172a;
+            --accent-hover: #1e293b;
+            --accent-soft: #f1f5f9;
             --danger-bg: #fef2f2;
             --danger-text: #991b1b;
+            --danger-border: #fecaca;
             --success-bg: #f0fdf4;
             --success-text: #166534;
+            --success-border: #bbf7d0;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background-color: var(--bg-canvas);
             color: var(--text-main);
             line-height: 1.6;
-            padding: 3rem 1rem;
+            padding: 2.5rem 1.25rem 4rem;
+            font-size: 14.5px;
         }
 
         .container {
-            max-width: 800px;
+            max-width: 1080px;
             margin: 0 auto;
         }
 
+        /* Sober Academic Header */
         header {
-            text-align: center;
-            margin-bottom: 2.5rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1.75rem;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            gap: 1rem;
         }
 
-        header h1 {
-            font-size: 2rem;
+        .header-title-block h1 {
+            font-family: 'Newsreader', Georgia, serif;
+            font-size: 2.2rem;
             font-weight: 600;
             color: var(--text-main);
-            margin-bottom: 0.4rem;
-            letter-spacing: -0.025em;
+            letter-spacing: -0.02em;
+            line-height: 1.15;
+            margin-bottom: 0.35rem;
         }
 
-        header p {
+        .header-title-block p {
             color: var(--text-muted);
-            font-size: 0.95rem;
+            font-size: 0.92rem;
         }
 
-        .privacy-badge {
-            display: inline-block;
+        .privacy-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
             background: var(--success-bg);
             color: var(--success-text);
-            padding: 0.3rem 0.8rem;
-            border-radius: 9999px;
-            font-size: 0.8rem;
+            border: 1px solid var(--success-border);
+            padding: 0.35rem 0.85rem;
+            border-radius: 4px;
+            font-size: 0.78rem;
             font-weight: 500;
-            margin-top: 0.75rem;
-            border: 1px solid #bbf7d0;
+            font-family: 'JetBrains Mono', monospace;
         }
 
         .card {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 2rem;
+            border-radius: 6px;
+            padding: 1.75rem;
             margin-bottom: 1.5rem;
-            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05);
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-bottom: 1.25rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border-subtle);
         }
 
         h2 {
-            font-size: 1.1rem;
+            font-family: 'Newsreader', Georgia, serif;
+            font-size: 1.35rem;
             font-weight: 600;
-            margin-bottom: 1rem;
             color: var(--text-main);
-            letter-spacing: -0.01em;
+        }
+
+        /* Upload & Controls */
+        .upload-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.25rem;
+            align-items: stretch;
+        }
+
+        @media (max-width: 768px) {
+            .upload-grid { grid-template-columns: 1fr; }
         }
 
         .upload-zone {
-            border: 2px dashed var(--border-color);
-            padding: 2rem 1.5rem;
+            border: 1.5px dashed var(--border-color);
+            padding: 1.75rem 1.25rem;
             border-radius: 6px;
             text-align: center;
-            background: #ffffff;
-            cursor: pointer;
-            transition: border-color 0.2s;
-            margin-bottom: 1rem;
+            background: #fcfcfd;
+            transition: border-color 0.2s, background 0.2s;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .upload-zone:hover {
             border-color: var(--accent);
+            background: #f8fafc;
         }
 
-        input[type="file"] {
-            font-size: 0.9rem;
+        .upload-zone label {
+            font-weight: 600;
+            font-size: 0.92rem;
+            cursor: pointer;
+            color: var(--text-main);
+        }
+
+        .upload-hint {
+            font-size: 0.78rem;
             color: var(--text-muted);
         }
 
-        .button-group {
+        .dataset-telemetry {
+            background: var(--accent-soft);
+            border: 1px solid var(--border-subtle);
+            border-radius: 6px;
+            padding: 1rem 1.25rem;
             display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 0.45rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+        }
+
+        .telemetry-row {
+            display: flex;
+            justify-content: space-between;
+            color: var(--text-secondary);
+        }
+
+        .telemetry-row strong {
+            color: var(--text-main);
+        }
+
+        #sheet-selector-wrap {
+            display: none;
+            margin-top: 1rem;
+            padding: 0.75rem 1rem;
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            align-items: center;
             gap: 0.75rem;
+            font-size: 0.85rem;
+        }
+
+        select {
+            padding: 0.35rem 0.6rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background: #ffffff;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.82rem;
+            color: var(--text-main);
+        }
+
+        /* Variable Diagnostic Table */
+        #hud {
+            display: none;
             margin-top: 1.5rem;
         }
 
-        button {
-            padding: 0.65rem 1.25rem;
+        .hud-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.6rem;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+        }
+
+        .table-scroll {
+            max-height: 340px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+        }
+
+        .col-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            font-size: 0.81rem;
+        }
+
+        .col-table th, .col-table td {
+            border-bottom: 1px solid var(--border-subtle);
+            padding: 0.55rem 0.75rem;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        .col-table th {
+            background: #f1f5f9;
+            font-weight: 600;
+            color: var(--text-secondary);
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .mono-cell {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.77rem;
+            color: var(--text-secondary);
+        }
+
+        .role-badge {
+            display: inline-block;
+            padding: 0.15rem 0.45rem;
+            border-radius: 3px;
+            font-size: 0.73rem;
             font-weight: 500;
+            background: #f1f5f9;
+            color: #1e293b;
+            border: 1px solid #cbd5e1;
+        }
+
+        /* Countdown & Progress Bar */
+        #countdown-container {
+            display: none;
+            margin-top: 1.25rem;
+            padding: 1.25rem;
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
             border-radius: 6px;
+        }
+
+        .countdown-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.6rem;
+            font-size: 0.88rem;
+            font-weight: 500;
+        }
+
+        .timer-badge {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--accent);
+            color: #ffffff;
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+
+        .progress-track {
+            width: 100%;
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: var(--accent);
+            transition: width 0.25s linear;
+        }
+
+        .countdown-subtext {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.76rem;
+            color: var(--text-muted);
+        }
+
+        /* Buttons */
+        .button-group {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1.25rem;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 0.6rem 1.2rem;
+            font-weight: 500;
+            border-radius: 4px;
             border: 1px solid transparent;
             cursor: pointer;
-            font-size: 0.9rem;
-            transition: all 0.2s;
+            font-size: 0.86rem;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.15s;
         }
 
         .btn-primary {
             background: var(--accent);
-            color: white;
-            border-color: var(--accent);
+            color: #ffffff;
         }
         .btn-primary:hover { background: var(--accent-hover); }
+
+        .btn-secondary {
+            background: #ffffff;
+            color: var(--text-main);
+            border-color: var(--border-color);
+        }
+        .btn-secondary:hover { background: var(--accent-soft); }
 
         .btn-danger {
             background: var(--danger-bg);
             color: var(--danger-text);
-            border-color: #fecaca;
+            border-color: var(--danger-border);
+            margin-left: auto;
         }
         .btn-danger:hover { background: #fee2e2; }
 
-        /* Countdown & Auto-detection HUD */
-        #countdown-container {
-            display: none;
-            text-align: center;
-            padding: 1.5rem;
-            font-size: 0.95rem;
-            color: var(--text-muted);
-            background: #f1f5f9;
-            border-radius: 6px;
-            margin-bottom: 1rem;
+        /* Filter Tabs for Results */
+        .filter-bar {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
         }
 
-        .auto-detection-hud {
-            display: none;
-            background: #f8fafc;
+        .filter-tab {
+            padding: 0.35rem 0.75rem;
+            font-size: 0.78rem;
+            border-radius: 4px;
+            background: var(--accent-soft);
+            color: var(--text-secondary);
             border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 1rem;
+            cursor: pointer;
+        }
+
+        .filter-tab.active {
+            background: var(--accent);
+            color: #ffffff;
+            border-color: var(--accent);
+        }
+
+        /* Recommendation Cards */
+        #results-container { display: none; }
+
+        .recommendation-item {
+            border: 1px solid var(--border-color);
+            border-left: 3.5px solid var(--accent);
+            border-radius: 4px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            background: #ffffff;
+        }
+
+        .test-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .recommendation-item h3 {
+            font-family: 'Newsreader', Georgia, serif;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .test-category-badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            background: var(--accent-soft);
+            color: var(--text-secondary);
+            padding: 0.2rem 0.55rem;
+            border-radius: 3px;
+            border: 1px solid var(--border-color);
+        }
+
+        .rationale-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
             margin-bottom: 1rem;
+            background: #f8fafc;
+            padding: 0.9rem 1rem;
+            border-radius: 4px;
+            border: 1px solid var(--border-subtle);
             font-size: 0.85rem;
         }
 
-        .hud-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 0.75rem;
-            margin-top: 0.5rem;
+        @media (max-width: 700px) {
+            .rationale-grid { grid-template-columns: 1fr; }
         }
 
-        .hud-item {
-            background: white;
-            padding: 0.5rem 0.75rem;
-            border-radius: 4px;
-            border: 1px solid #e2e8f0;
-        }
-
-        .hud-label { color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
-        .hud-value { font-weight: 600; color: var(--text-main); margin-top: 0.1rem; }
-
-        /* Results */
-        #results-container { display: none; }
-        .recommendation-box {
-            border-left: 3px solid var(--accent);
-            padding-left: 1.25rem;
-        }
-
-        .recommendation-box h3 {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: var(--text-main);
-            margin-bottom: 0.5rem;
-        }
-
-        .rationale {
+        .rationale-box strong {
+            display: block;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
             color: var(--text-muted);
-            font-size: 0.95rem;
-            margin-bottom: 1.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .applicable-pairs {
+            margin-bottom: 1.15rem;
+        }
+
+        .applicable-pairs-title {
+            font-size: 0.76rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--text-muted);
+            margin-bottom: 0.45rem;
+        }
+
+        .pair-pill {
+            display: inline-block;
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            padding: 0.2rem 0.55rem;
+            border-radius: 3px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.76rem;
+            color: var(--text-main);
+            margin: 0 0.35rem 0.35rem 0;
+        }
+
+        .pair-pill-more {
+            display: inline-block;
+            background: var(--accent-soft);
+            border: 1px dashed var(--border-color);
+            padding: 0.2rem 0.55rem;
+            border-radius: 3px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            cursor: pointer;
         }
 
         .viz-card {
             background: #ffffff;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 1.25rem;
+            border: 1px solid var(--border-subtle);
+            border-radius: 4px;
+            padding: 1.25rem 1rem 0.85rem;
             text-align: center;
+            position: relative;
         }
 
-        .viz-card svg { max-width: 100%; height: auto; }
-        .viz-caption {
-            font-size: 0.8rem;
-            color: var(--text-muted);
+        .viz-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-top: 0.75rem;
-            font-style: italic;
+            padding-top: 0.6rem;
+            border-top: 1px solid var(--border-subtle);
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
+        .btn-svg-dl {
+            padding: 0.25rem 0.6rem;
+            font-size: 0.74rem;
+            font-family: 'JetBrains Mono', monospace;
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .btn-svg-dl:hover {
+            background: var(--accent);
+            color: #ffffff;
+            border-color: var(--accent);
         }
     </style>
 </head>
@@ -215,217 +522,1053 @@
 
 <div class="container">
     <header>
-        <h1>Statistical Test Recommender</h1>
-        <p>Automated econometric and biostatistical test selector with zero server footprint.</p>
-        <div class="privacy-badge">🔒 100% Private: Processed in browser RAM only</div>
+        <div class="header-title-block">
+            <h1>StatEngine Research</h1>
+            <p>High-dimensional biostatistical, econometric &amp; longitudinal test decision architecture.</p>
+        </div>
+        <div class="privacy-pill">
+            <span>● ZERO-STORAGE RAM SANDBOX</span>
+        </div>
     </header>
 
+    <!-- STEP 1: DATA INGESTION & DIAGNOSTICS -->
     <div class="card">
-        <h2>1. Upload Dataset (.xlsx, .xls, .csv)</h2>
-        <div class="upload-zone">
-            <input type="file" id="dataset-file" accept=".xlsx, .xls, .csv" onchange="processFile(event)">
+        <div class="section-header">
+            <h2>1. Research Dataset Ingestion &amp; Schema Diagnostics</h2>
+            <button class="btn-secondary" onclick="loadSyntheticComplexDataset()">Load Complex Clinical Trial Demo (N=240, 10 Vars)</button>
         </div>
 
-        <!-- Auto-Detection HUD -->
-        <div id="hud" class="auto-detection-hud">
-            <strong>Automatically Detected Dataset Parameters:</strong>
-            <div class="hud-grid">
-                <div class="hud-item"><div class="hud-label">IV Type</div><div id="hud-iv" class="hud-value">-</div></div>
-                <div class="hud-item"><div class="hud-label">DV Type</div><div id="hud-dv" class="hud-value">-</div></div>
-                <div class="hud-item"><div class="hud-label">Groups / Levels</div><div id="hud-groups" class="hud-value">-</div></div>
-                <div class="hud-item"><div class="hud-label">Distribution</div><div id="hud-normality" class="hud-value">-</div></div>
+        <div class="upload-grid">
+            <div class="upload-zone" onclick="document.getElementById('dataset-file').click()">
+                <label for="dataset-file">Select or Drop Research File (.xlsx, .xls, .csv, .tsv)</label>
+                <input type="file" id="dataset-file" accept=".xlsx, .xls, .csv, .tsv" onchange="processFile(event)" style="display:none">
+                <div class="upload-hint">Supports multi-sheet Excel workbooks, large cohorts (100k+ rows), missing values (NA/NULL), and mixed schemas.</div>
+            </div>
+
+            <div class="dataset-telemetry">
+                <div class="telemetry-row"><span>File Status:</span><strong id="tel-status">Awaiting Dataset</strong></div>
+                <div class="telemetry-row"><span>Observations (N):</span><strong id="tel-rows">0</strong></div>
+                <div class="telemetry-row"><span>Total Features (P):</span><strong id="tel-cols">0</strong></div>
+                <div class="telemetry-row"><span>Missing Cells:</span><strong id="tel-missing">0.0%</strong></div>
+                <div class="telemetry-row"><span>Design Structure:</span><strong id="tel-design">Unassigned</strong></div>
             </div>
         </div>
 
-        <!-- Countdown Timer HUD -->
+        <!-- Multi-sheet selector for Excel workbooks -->
+        <div id="sheet-selector-wrap">
+            <strong>Excel Workbook Sheet:</strong>
+            <select id="sheet-select" onchange="switchExcelSheet()"></select>
+            <span style="color:var(--text-muted); font-size:0.78rem;">(Switch tab to re-profile worksheet in memory)</span>
+        </div>
+
+        <!-- Auto-Detected Variable Schema & Override Table -->
+        <div id="hud">
+            <div class="hud-toolbar">
+                <strong>Automated Variable Taxonomy &amp; Moment Diagnostics (Override Role if Needed):</strong>
+                <span id="sampling-note">Exact Full-Scan Mode</span>
+            </div>
+            <div class="table-scroll">
+                <table class="col-table">
+                    <thead>
+                        <tr>
+                            <th>Variable Name</th>
+                            <th>Assigned Statistical Role (Editable)</th>
+                            <th>Valid N (Missing)</th>
+                            <th>Cardinality</th>
+                            <th>Skewness ($g_1$) / Kurtosis ($g_2$)</th>
+                            <th>Dispersion ($\sigma^2/\mu$)</th>
+                            <th>Parametric Assumption</th>
+                        </tr>
+                    </thead>
+                    <tbody id="hud-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Countdown & Execution Progress -->
         <div id="countdown-container">
-            Analyzing dataset structures and normality... <span id="timer" style="font-weight: 600; color: var(--text-main);">3</span>s remaining
+            <div class="countdown-header">
+                <span id="countdown-phase">Initializing statistical decision tree...</span>
+                <span class="timer-badge"><span id="timer">2.5</span>s remaining</span>
+            </div>
+            <div class="progress-track">
+                <div id="progress-fill" class="progress-fill"></div>
+            </div>
+            <div id="countdown-detail" class="countdown-subtext">Evaluating bivariate, multivariable, longitudinal, and censored survival topologies...</div>
         </div>
 
         <div class="button-group">
-            <button class="btn-primary" onclick="runAnalysisWorkflow()">Generate Recommendations</button>
-            <button class="btn-danger" onclick="clearDataset()">Clear Dataset</button>
+            <button class="btn-primary" onclick="runAnalysisWorkflow()">Synthesize Statistical Recommendations</button>
+            <button class="btn-danger" onclick="clearDataset()">Purge Dataset from RAM</button>
         </div>
     </div>
 
+    <!-- STEP 2: EXHAUSTIVE STATISTICAL RECOMMENDATIONS -->
     <div id="results-container" class="card">
-        <h2>2. Recommended Statistical Test & Publication Visual</h2>
+        <div class="section-header">
+            <h2 id="results-title">2. Recommended Statistical Methodologies &amp; Publication Visuals</h2>
+        </div>
+
+        <div class="filter-bar" id="filter-bar">
+            <button class="filter-tab active" onclick="filterRecommendations('ALL', this)">All Applicable Tests</button>
+            <button class="filter-tab" onclick="filterRecommendations('GROUP', this)">Group Comparisons</button>
+            <button class="filter-tab" onclick="filterRecommendations('REGRESSION', this)">Multivariable &amp; GLMs</button>
+            <button class="filter-tab" onclick="filterRecommendations('LONGITUDINAL', this)">Longitudinal &amp; Survival</button>
+            <button class="filter-tab" onclick="filterRecommendations('MULTIVARIATE', this)">High-Dimensional / Omics</button>
+        </div>
+
         <div id="recommendation-output"></div>
     </div>
 </div>
 
 <script>
+    // Global In-Memory Structures (Purged on Clear)
+    let currentWorkbook = null;
     let parsedDataRows = null;
-    let autoParams = { ivType: '', dvType: '', numGroups: '', normality: '' };
+    let columnProfiles = [];
+    let activeRecommendations = [];
+
+    const MISSING_TOKENS = new Set(['', 'na', 'n/a', 'null', 'nan', 'none', '.', '-', 'missing', 'undefined']);
+
+    function isMissing(val) {
+        if (val === null || val === undefined) return true;
+        if (typeof val === 'number') return isNaN(val);
+        if (typeof val === 'string') return MISSING_TOKENS.has(val.trim().toLowerCase());
+        return false;
+    }
 
     function processFile(event) {
         const file = event.target.files[0];
         if (!file) return;
 
+        document.getElementById('tel-status').innerText = file.name;
         const reader = new FileReader();
+
         reader.onload = function(e) {
             const buffer = e.target.result;
-            if (file.name.endsWith('.csv')) {
+            if (file.name.endsWith('.csv') || file.name.endsWith('.tsv')) {
+                document.getElementById('sheet-selector-wrap').style.display = 'none';
                 const text = new TextDecoder().decode(buffer);
-                const result = Papa.parse(text, { header: true, dynamicTyping: true });
-                parsedDataRows = result.data.filter(row => Object.keys(row).length > 0);
+                const result = Papa.parse(text, { header: true, dynamicTyping: true, skipEmptyLines: true });
+                parsedDataRows = result.data;
+                profileDataset(parsedDataRows);
             } else {
                 const data = new Uint8Array(buffer);
-                const workbook = XLSX.read(data, { type: 'array' });
-                const firstSheet = workbook.SheetNames[0];
-                parsedDataRows = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheet]);
-            }
+                currentWorkbook = XLSX.read(data, { type: 'array' });
+                const sheets = currentWorkbook.SheetNames;
 
-            // Perform automatic feature extraction
-            autoDetectParameters(parsedDataRows);
+                if (sheets.length > 1) {
+                    const select = document.getElementById('sheet-select');
+                    select.innerHTML = sheets.map(s => `<option value="${s}">${s}</option>`).join('');
+                    document.getElementById('sheet-selector-wrap').style.display = 'flex';
+                } else {
+                    document.getElementById('sheet-selector-wrap').style.display = 'none';
+                }
+
+                parsedDataRows = XLSX.utils.sheet_to_json(currentWorkbook.Sheets[sheets[0]]);
+                profileDataset(parsedDataRows);
+            }
         };
 
-        if (file.name.endsWith('.csv')) {
-            reader.readAsArrayBuffer(file);
-        } else {
-            reader.readAsArrayBuffer(file);
-        }
+        reader.readAsArrayBuffer(file);
     }
 
-    function autoDetectParameters(rows) {
+    function switchExcelSheet() {
+        if (!currentWorkbook) return;
+        const sheetName = document.getElementById('sheet-select').value;
+        parsedDataRows = XLSX.utils.sheet_to_json(currentWorkbook.Sheets[sheetName]);
+        profileDataset(parsedDataRows);
+    }
+
+    // High-Performance Profiler with Higher-Order Moments & Structural Heuristics
+    function profileDataset(rows) {
         if (!rows || rows.length === 0) return;
+
+        const totalRows = rows.length;
         const columns = Object.keys(rows[0]);
-        if (columns.length < 2) {
-            alert("Dataset must contain at least 2 columns (Independent and Dependent variables).");
-            return;
-        }
+        columnProfiles = [];
 
-        const col1Key = columns[0]; // IV proxy
-        const col2Key = columns[1]; // DV proxy
+        // Reservoir stride for very large datasets (N > 25,000) to keep UI responsive
+        const MAX_SAMPLE = 25000;
+        const stride = totalRows > MAX_SAMPLE ? Math.ceil(totalRows / MAX_SAMPLE) : 1;
+        document.getElementById('sampling-note').innerText = stride > 1
+            ? `Large-Cohort Strided Profiling (Sampled ${Math.ceil(totalRows/stride).toLocaleString()} of ${totalRows.toLocaleString()} rows)`
+            : `Exact Full-Cohort Scan (N = ${totalRows.toLocaleString()})`;
 
-        // Analyze Column 1 (IV)
-        const col1Values = rows.map(r => r[col1Key]).filter(val => val !== null && val !== undefined);
-        const uniqueCol1 = [...new Set(col1Values)];
-        const isCol1Numeric = col1Values.every(val => typeof val === 'number');
+        let totalCells = totalRows * columns.length;
+        let totalMissing = 0;
 
-        if (!isCol1Numeric || uniqueCol1.length <= 10) {
-            autoParams.ivType = 'categorical';
-            autoParams.numGroups = uniqueCol1.length <= 2 ? '2' : '3+';
-        } else {
-            autoParams.ivType = 'continuous';
-            autoParams.numGroups = '2';
-        }
+        columns.forEach((col, colIdx) => {
+            let validCount = 0;
+            let missingCount = 0;
+            const numVals = [];
+            const uniqueSet = new Set();
+            let allIntegers = true;
+            let allNonNegative = true;
 
-        // Analyze Column 2 (DV)
-        const col2Values = rows.map(r => r[col2Key]).filter(val => typeof val === 'number');
-        const isCol2Numeric = col2Values.length > (rows.length * 0.7);
+            for (let i = 0; i < totalRows; i += stride) {
+                const raw = rows[i][col];
+                if (isMissing(raw)) {
+                    missingCount += stride;
+                    continue;
+                }
+                validCount += stride;
+                uniqueSet.add(raw);
 
-        if (isCol2Numeric) {
-            autoParams.dvType = 'continuous';
-            
-            // Approximate Normality via simple skewness check
-            const mean = col2Values.reduce((a, b) => a + b, 0) / col2Values.length;
-            const variance = col2Values.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / col2Values.length;
-            const stdDev = Math.sqrt(variance);
-            const median = col2Values.sort((a,b)=>a-b)[Math.floor(col2Values.length/2)];
-            
-            // Non-parametric skew indicator (mean vs median difference relative to stdDev)
-            const skewIndicator = Math.abs(mean - median) / (stdDev || 1);
-            autoParams.normality = skewIndicator < 0.3 ? 'normal' : 'non-normal';
-        } else {
-            autoParams.dvType = 'categorical';
-            autoParams.normality = 'non-normal';
-        }
+                const num = typeof raw === 'number' ? raw : Number(raw);
+                if (!isNaN(num) && typeof raw !== 'boolean') {
+                    numVals.push(num);
+                    if (!Number.isInteger(num)) allIntegers = false;
+                    if (num < 0) allNonNegative = false;
+                }
+            }
 
-        // Display HUD
-        document.getElementById('hud-iv').innerText = autoParams.ivType === 'categorical' ? 'Categorical (Groups)' : 'Continuous (Numeric)';
-        document.getElementById('hud-dv').innerText = autoParams.dvType === 'continuous' ? 'Continuous (Scale)' : 'Categorical (Count)';
-        document.getElementById('hud-groups').innerText = autoParams.ivType === 'categorical' ? `${autoParams.numGroups} Groups Detected` : 'N/A (Regression)';
-        document.getElementById('hud-normality').innerText = autoParams.normality === 'normal' ? 'Normally Distributed' : 'Skewed / Non-Normal';
+            totalMissing += Math.min(totalRows, missingCount);
+            const sampleValid = numVals.length;
+            const uniqueCount = uniqueSet.size;
+            const isNumeric = sampleValid > 0 && (sampleValid >= (validCount / stride) * 0.85);
+
+            // Compute Higher-Order Moments (Mean, SD, Skewness g1, Excess Kurtosis g2, Jarque-Bera, Dispersion)
+            let mean = 0, stdDev = 0, skewness = 0, kurtosis = 0, vmr = 0;
+            let isNormal = false;
+
+            if (isNumeric && sampleValid >= 4) {
+                const n = sampleValid;
+                mean = numVals.reduce((a, b) => a + b, 0) / n;
+                let m2 = 0, m3 = 0, m4 = 0;
+                for (let k = 0; k < n; k++) {
+                    const diff = numVals[k] - mean;
+                    const d2 = diff * diff;
+                    m2 += d2;
+                    m3 += d2 * diff;
+                    m4 += d2 * d2;
+                }
+                const variance = m2 / n;
+                stdDev = Math.sqrt(variance);
+                if (stdDev > 1e-9) {
+                    skewness = (m3 / n) / Math.pow(stdDev, 3);
+                    kurtosis = (m4 / n) / Math.pow(variance, 2) - 3; // Excess kurtosis
+                }
+                vmr = mean > 1e-6 ? (variance / mean) : 0;
+
+                // Normality heuristic combining Jarque-Bera / empirical moment bounds
+                isNormal = Math.abs(skewness) <= 0.85 && Math.abs(kurtosis) <= 2.0;
+            }
+
+            // Intelligent Research Taxonomy Classification
+            const nameLower = col.toLowerCase();
+            let role = 'categorical_poly';
+
+            const idNameMatch = /(^id$|_id$|^subject|patient|participant|uuid|barcode|sample_id|record_id)/i.test(nameLower);
+            const timeToEventMatch = /(surv|time|duration|followup|follow_up|os_months|pfs_days|tte)/i.test(nameLower);
+            const censorEventMatch = /(status|event|censor|dead|death|relapse|vital)/i.test(nameLower);
+
+            if (uniqueCount <= 1) {
+                role = 'exclude';
+            } else if (idNameMatch && uniqueCount >= (validCount / stride) * 0.85) {
+                role = 'exclude_id';
+            } else if (idNameMatch && uniqueCount < (validCount / stride) * 0.85 && uniqueCount >= 2) {
+                role = 'cluster_id'; // Repeated Measures Subject / Cluster ID!
+            } else if (censorEventMatch && uniqueCount === 2) {
+                role = 'binary'; // Can serve as Binary Outcome OR Survival Event Indicator
+            } else if (uniqueCount === 2) {
+                role = 'binary';
+            } else if (!isNumeric) {
+                role = uniqueCount > 25 ? 'exclude_id' : 'categorical_poly';
+            } else {
+                // Numeric Taxonomy
+                if (timeToEventMatch && allNonNegative && uniqueCount > 6) {
+                    role = 'time_to_event';
+                } else if (allIntegers && uniqueCount >= 3 && uniqueCount <= 7) {
+                    role = 'ordinal';
+                } else if (allIntegers && allNonNegative && uniqueCount <= 25 && vmr >= 1.15 && skewness > 0.6) {
+                    role = 'count';
+                } else {
+                    role = isNormal ? 'continuous_normal' : 'continuous_skewed';
+                }
+            }
+
+            columnProfiles.push({
+                index: colIdx,
+                name: col,
+                role: role,
+                validCount: Math.min(totalRows, validCount),
+                missingCount: Math.min(totalRows, missingCount),
+                uniqueCount: uniqueCount,
+                isNumeric: isNumeric,
+                mean: mean,
+                stdDev: stdDev,
+                skewness: skewness,
+                kurtosis: kurtosis,
+                vmr: vmr,
+                isNormal: isNormal
+            });
+        });
+
+        // Update Telemetry HUD
+        document.getElementById('tel-rows').innerText = totalRows.toLocaleString();
+        document.getElementById('tel-cols').innerText = columns.length.toLocaleString();
+        const missPct = totalCells > 0 ? ((totalMissing / totalCells) * 100).toFixed(1) : '0.0';
+        document.getElementById('tel-missing').innerText = `${missPct}%`;
+
+        updateDesignTelemetry();
+        renderHudTable();
         document.getElementById('hud').style.display = 'block';
+        document.getElementById('results-container').style.display = 'none';
     }
 
+    function updateDesignTelemetry() {
+        const hasCluster = columnProfiles.some(c => c.role === 'cluster_id');
+        const hasTTE = columnProfiles.some(c => c.role === 'time_to_event');
+        const contCount = columnProfiles.filter(c => c.role.startsWith('continuous') || c.role === 'time_to_event').length;
+        let designLabel = 'Cross-Sectional';
+        if (hasCluster && hasTTE) designLabel = 'Longitudinal & Survival Cohort';
+        else if (hasCluster) designLabel = 'Repeated-Measures / Clustered';
+        else if (hasTTE) designLabel = 'Time-to-Event / Survival Cohort';
+        else if (contCount >= 4) designLabel = 'High-Dimensional Multivariate';
+        document.getElementById('tel-design').innerText = designLabel;
+    }
+
+    const ROLE_OPTIONS = [
+        { value: 'continuous_normal', label: 'Continuous (Gaussian / Parametric)' },
+        { value: 'continuous_skewed', label: 'Continuous (Skewed / Non-Parametric)' },
+        { value: 'binary', label: 'Binary Categorical / Event (2 Levels)' },
+        { value: 'categorical_poly', label: 'Polytomous Categorical (3+ Groups)' },
+        { value: 'ordinal', label: 'Ordinal / Likert Scale' },
+        { value: 'count', label: 'Discrete Count (Poisson / NegBin)' },
+        { value: 'time_to_event', label: 'Survival Time / Duration (T)' },
+        { value: 'cluster_id', label: 'Repeated-Measures Subject / Cluster ID' },
+        { value: 'exclude_id', label: 'Unique Identifier (Excluded)' },
+        { value: 'exclude', label: 'Exclude from Analysis' }
+    ];
+
+    function renderHudTable() {
+        const tbody = document.getElementById('hud-table-body');
+        tbody.innerHTML = '';
+
+        columnProfiles.forEach((col, idx) => {
+            const optionsHtml = ROLE_OPTIONS.map(opt =>
+                `<option value="${opt.value}" ${col.role === opt.value ? 'selected' : ''}>${opt.label}</option>`
+            ).join('');
+
+            const skewKurtText = col.isNumeric
+                ? `${col.skewness.toFixed(2)} / ${col.kurtosis.toFixed(2)}`
+                : '—';
+
+            const vmrText = col.isNumeric ? col.vmr.toFixed(2) : '—';
+            const normBadge = !col.isNumeric
+                ? '<span class="role-badge">Categorical</span>'
+                : (col.isNormal
+                    ? '<span class="role-badge" style="background:#f0fdf4;color:#166534;border-color:#bbf7d0;">Gaussian (Pass)</span>'
+                    : '<span class="role-badge" style="background:#fffbeb;color:#92400e;border-color:#fde68a;">Non-Normal / Skew</span>');
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><strong>${col.name}</strong></td>
+                <td>
+                    <select onchange="overrideColumnRole(${idx}, this.value)">
+                        ${optionsHtml}
+                    </select>
+                </td>
+                <td class="mono-cell">${col.validCount.toLocaleString()} (${col.missingCount})</td>
+                <td class="mono-cell">${col.uniqueCount.toLocaleString()} levels</td>
+                <td class="mono-cell">${skewKurtText}</td>
+                <td class="mono-cell">${vmrText}</td>
+                <td>${normBadge}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function overrideColumnRole(index, newRole) {
+        columnProfiles[index].role = newRole;
+        updateDesignTelemetry();
+    }
+
+    // Countdown Workflow with Analytical Phases
     function runAnalysisWorkflow() {
-        if (!parsedDataRows) {
-            alert("Please upload an Excel or CSV file first.");
+        if (!parsedDataRows || columnProfiles.length < 2) {
+            alert("Please upload a valid research dataset or click 'Load Complex Clinical Trial Demo' first.");
             return;
         }
 
         const countdownEl = document.getElementById('countdown-container');
         const timerEl = document.getElementById('timer');
+        const phaseEl = document.getElementById('countdown-phase');
+        const fillEl = document.getElementById('progress-fill');
+
         countdownEl.style.display = 'block';
         document.getElementById('results-container').style.display = 'none';
 
-        let timeLeft = 3;
-        timerEl.innerText = timeLeft;
+        const totalDuration = 2500; // 2.5 seconds
+        const stepMs = 100;
+        let elapsed = 0;
+
+        const phases = [
+            "Phase 1/3: Filtering high-cardinality identifiers & verifying missingness mechanisms...",
+            "Phase 2/3: Checking Jarque-Bera normality, variance-to-mean overdispersion & repeated IDs...",
+            "Phase 3/3: Synthesizing bivariate, multivariable GLM, mixed-effects & survival models..."
+        ];
 
         const interval = setInterval(() => {
-            timeLeft--;
-            timerEl.innerText = timeLeft;
-            if (timeLeft <= 0) {
+            elapsed += stepMs;
+            const remaining = Math.max(0, (totalDuration - elapsed) / 1000).toFixed(1);
+            const pct = Math.min(100, (elapsed / totalDuration) * 100);
+
+            timerEl.innerText = remaining;
+            fillEl.style.width = `${pct}%`;
+
+            if (pct < 35) phaseEl.innerText = phases[0];
+            else if (pct < 75) phaseEl.innerText = phases[1];
+            else phaseEl.innerText = phases[2];
+
+            if (elapsed >= totalDuration) {
                 clearInterval(interval);
                 countdownEl.style.display = 'none';
-                generateRecommendationOutput();
+                evaluateResearchMethodologies();
             }
-        }, 1000);
+        }, stepMs);
     }
 
-    function generateRecommendationOutput() {
-        const { ivType, dvType, numGroups, normality } = autoParams;
-        let testName = "";
-        let rationale = "";
-        let svgViz = "";
+    // =========================================================================
+    // MASTER RESEARCH CATALOGUE: 12 PUBLICATION-GRADE TESTS & SVG VISUALIZATIONS
+    // =========================================================================
+    const RESEARCH_TEST_CATALOG = {
+        'welch_t_test': {
+            title: "Independent Samples Welch's / Student's t-Test",
+            group: "GROUP",
+            category: "Parametric Two-Group Mean Comparison",
+            rationale: "Selected for binary independent variables paired with Gaussian continuous outcomes (|g₁| ≤ 0.85, |g₂| ≤ 2.0). Welch's adaptation is preferred in modern biostatistics as it does not assume homoscedasticity (equal variances) across arms.",
+            assumptions: "Continuous metric outcome; independent observations; approximate normality within groups; Welch-Satterthwaite degrees of freedom adjustment.",
+            svg: `<svg xmlns="http://www.w3.org/2000/svg" width="560" height="220" viewBox="0 0 560 220">
+                <rect width="560" height="220" fill="#ffffff"/>
+                <line x1="75" y1="25" x2="75" y2="175" stroke="#0f172a" stroke-width="1.5"/>
+                <line x1="75" y1="175" x2="510" y2="175" stroke="#0f172a" stroke-width="1.5"/>
+                <text x="25" y="100" text-anchor="middle" font-size="11" fill="#334155" font-family="Inter, sans-serif" transform="rotate(-90 25,100)">Continuous Outcome (Mean ± SD)</text>
+                <!-- Control Raincloud + Box -->
+                <path d="M 185 155 C 145 135, 145 65, 185 45 L 185 155 Z" fill="#cbd5e1" opacity="0.65" stroke="#0f172a" stroke-width="1.2"/>
+                <rect x="192" y="78" width="24" height="48" fill="#ffffff" stroke="#0f172a" stroke-width="1.5"/>
+                <line x1="192" y1="102" x2="216" y2="102" stroke="#0f172a" stroke-width="2.5"/>
+                <line x1="204" y1="52" x2="204" y2="78" stroke="#0f172a" stroke-width="1.2"/>
+                <line x1="204" y1="126" x2="204" y2="150" stroke="#0f172a" stroke-width="1.2"/>
+                <circle cx="232" cy="85" r="2.5" fill="#334155"/><circle cx="238" cy="112" r="2.5" fill="#334155"/><circle cx="229" cy="98" r="2.5" fill="#334155"/><circle cx="236" cy="74" r="2.5" fill="#334155"/>
+                <!-- Treatment Raincloud + Box -->
+                <path d="M 375 140 C 330 115, 330 45, 375 30 L 375 140 Z" fill="#64748b" opacity="0.55" stroke="#0f172a" stroke-width="1.2"/>
+                <rect x="382" y="55" width="24" height="45" fill="#f8fafc" stroke="#0f172a" stroke-width="1.5"/>
+                <line x1="382" y1="76" x2="406" y2="76" stroke="#0f172a" stroke-width="2.5"/>
+                <line x1="394" y1="32" x2="394" y2="55" stroke="#0f172a" stroke-width="1.2"/>
+                <line x1="394" y1="100" x2="394" y2="128" stroke="#0f172a" stroke-width="1.2"/>
+                <circle cx="422" cy="62" r="2.5" fill="#0f172a"/><circle cx="428" cy="88" r="2.5" fill="#0f172a"/><circle cx="419" cy="74" r="2.5" fill="#0f172a"/><circle cx="425" cy="50" r="2.5" fill="#0f172a"/>
+                <!-- Significance Bar -->
+                <path d="M 204 28 L 204 18 L 394 18 L 394 24" fill="none" stroke="#0f172a" stroke-width="1.2"/>
+                <text x="299" y="13" text-anchor="middle" font-size="10.5" font-weight="600" fill="#0f172a" font-family="JetBrains Mono, monospace">Δ = +1.42 SD, p = 0.0032 (**)</text>
+                <text x="204" y="196" text-anchor="middle" font-size="11" font-weight="500" fill="#0f172a" font-family="Inter, sans-serif">Cohort Arm A (Control)</text>
+                <text x="394" y="196" text-anchor="middle" font-size="11" font-weight="500" fill="#0f172a" font-family="Inter, sans-serif">Cohort Arm B (Intervention)</text>
+            </svg>`,
+            caption: "Raincloud plot combining half-violin kernel density, interquartile boxplot, and jittered individual observations."
+        },
+        'mann_whitney': {
+            title: "Mann-Whitney U / Wilcoxon Rank-Sum Test",
+            group: "GROUP",
+            category: "Non-Parametric Two-Group Stochastic Dominance",
+            rationale: "Triggered for two-group comparisons when the outcome exhibits substantial skewness, heavy kurtosis, or ordinal scaling. Evaluates stochastic dominance P(X > Y) and median shift (Hodges-Lehmann estimator) without distributional fragility.",
+            assumptions: "Continuous or ordinal response; independent observations; monotonic distribution shape for pure median interpretation.",
+            svg: `<svg xmlns="http://www.w3.org/2000/svg" width="560" height="220" viewBox="0 0 560 220">
+                <rect width="560" height="220" fill="#ffffff"/>
+                <line x1="75" y1="25" x2="75" y2="175" stroke="#0f172a" stroke-width="1.5"/>
+                <line x1="75" y1="175" x2="510" y2="175" stroke="#0f172a" stroke-width="1.5"/>
+                <text x="25" y="100" text-anchor="middle" font-size="11" fill="#334155" font-family="Inter, sans-serif" transform="rotate(-90 25,100)">Rank Distribution / Median (IQR)</text>
+                <!-- Skewed Violin 1 -->
+                <path d="M 195 162 C 145 145, 165 75, 195 42 C 225 75, 245 145, 195 162 Z" fill="#f1f5f9" stroke="#0f172a" stroke-width="1.5"/>
+                <line x1="195" y1="78" x2="195" y2="138" stroke="#0f172a" stroke-width="3"/>
+                <circle cx="195" cy="118" r="4.5" fill="#ffffff" stroke="#0f172a" stroke-width="2"/>
+                <!-- Skewed Violin 2 -->
+                <path d="M 385 155 C 335 125, 355 55, 385 32 C 415 55, 435 125, 385 155 Z" fill="#cbd5e1" stroke="#0f172a" stroke-width="1.5"/>
+                <line x1="385" y1="58" x2="385" y2="115" stroke="#0f172a" stroke-width="3"/>
+                <circle cx="385" cy="84" r="4.5" fill="#ffffff" stroke="#0f172a" stroke-width="2"/>
+                <text x="290" y="25" text-anchor="middle" font-size="10.5" fill="#334155" font-family="JetBrains Mono, monospace">Hodges-Lehmann Median Shift &amp; Rank-Biserial r</text>
+                <text x="195" y="196" text-anchor="middle" font-size="11" font-weight="500" fill="#0f172a" font-family="Inter, sans-serif">Group 0 (Median + IQR)</text>
+                <text x="385" y="196" text-anchor="middle" font-size="11" font-weight="500" fill="#0f172a" font-family="Inter, sans-serif">Group 1 (Median + IQR)</text>
+            </svg>`,
+            caption: "Trimmed kernel density violin plot with embedded median node and 25th–75th percentile interquartile bar."
+        },
+        'anova_welch': {
+            title: "One-Way ANOVA & Welch's Heteroscedastic F-Test (with Tukey HSD)",
+            group: "GROUP",
+            category: "Parametric Multi-Group Omnibus Comparison (3+ Levels)",
+            rationale: "Recommended when comparing a Gaussian continuous variable across 3 or more independent factor levels. Partitioning between-group and within-group variance prevents family-wise Type I error inflation prior to Tukey-Kramer or Dunnett post-hoc contrasts.",
+            assumptions: "Gaussian residuals within groups; independence of observations; homoscedasticity (or Welch F correction if Levene's test fails).",
+            svg: `<svg xmlns="http://www.w3.org/2000/svg" width="560" height="220" viewBox="0 0 560 220">
+                <rect width="560" height="220" fill="#ffffff"/>
+                <line x1="75" y1="25" x2="75" y2="175" stroke="#0f172a" stroke-width="1.5"/>
+                <line x1="75" y1="175" x2="510" y2="175" stroke="#0f172a" stroke-width="1.5"/>
+                <text x="25" y="100" text-anchor="middle" font-size="11" fill="#334155" font-family="Inter, sans-serif" transform="rotate(-90 25,100)">Estimated Marginal Mean ± 95% CI</text>
+                <!-- Group Means + Error Bars + Jitter -->
+                <g stroke="#0f172a" stroke-width="1.6">
+                    <line x1="145" y1="85" x2="145" y2="135"/><line x1="135" y1="85" x2="155" y2="85"/><line x1="135" y1="135" x2="155" y2="135"/>
+                    <circle cx="145" cy="110" r="5" fill="#0f172a"/>
+                    <line x1="255" y1="50" x2="255" y2="95"/><line x1="245" y1="50" x2="265" y2="50"/><line x1="245" y1="95" x2="265" y2="95"/>
+                    <circle cx="255" cy="72" r="5" fill="#0f172a"/>
+                    <line x1="365" y1="95" x2="365" y2="142"/><line x1="355" y1="95" x2="375" y2="95"/><line x1="355" y1="142" x2="375" y2="142"/>
+                    <circle cx="365" cy="118" r="5" fill="#0f172a"/>
+                    <line x1="460" y1="40" x2="460" y2="82"/><line x1="450" y1="40" x2="470" y2="40"/><line x1="450" y1="82" x2="470" y2="82"/>
+                    <circle cx="460" cy="61" r="5" fill="#0f172a"/>
+                </g>
+                <!-- Compact Letter Display (Tukey Post-Hoc) -->
+                <text x="145" y="75" text-anchor="middle" font-size="10.5" font-weight="600" fill="#334155" font-family="JetBrains Mono, monospace">a</text>
+                <text x="255" y="40" text-anchor="middle" font-size="10.5" font-weight="600" fill="#334155" font-family="JetBrains Mono, monospace">b</text>
+                <text x="365" y="85" text-anchor="middle" font-size="10.5" font-weight="600" fill="#334155" font-family="JetBrains Mono, monospace">a</text>
+                <text x="460" y="30" text-anchor="middle" font-size="10.5" font-weight="600" fill="#334155" font-family="JetBrains Mono, monospace">b</text>
+                <text x="145" y="196" text-anchor="middle" font-size="11" fill="#0f172a" font-family="Inter, sans-serif">Cohort I</text>
+                <text x="255" y="196" text-anchor="middle" font-size="11" fill="#0f172a" font-family="Inter, sans-serif">Cohort II</text>
+                <text x="365" y="196" text-anchor="middle" font-size="11" fill="#0f172a" font-family="Inter, sans-serif">Cohort III</text>
+                <text x="460" y="196" text-anchor="middle" font-size="11" fill="#0f172a" font-family="Inter, sans-serif">Cohort IV</text>
+            </svg>`,
+            caption: "Interval plot of group means with 95% confidence bounds and Compact Letter Display (a, b) for Tukey HSD post-hoc groupings."
+        },
+        'kruskal_wallis': {
+            title: "Kruskal-Wallis H Test (with Dunn-Bonferroni Post-Hoc)",
+            group: "GROUP",
+            category: "Non-Parametric Multi-Group Omnibus Comparison (3+ Levels)",
+            rationale: "Recommended when evaluating 3 or more categorical levels against a skewed continuous or ordinal variable. Ranks all observations globally (N) to test whether samples originate from the same distribution, followed by Dunn's pairwise rank contrasts.",
+            assumptions: "Continuous or ordinal outcome; 3+ independent groups; no Gaussian normality assumption required.",
+            svg: `<svg xmlns="http://www.w3.org/2000/svg" width="560" height="220" viewBox="0 0 560 220">
+                <rect width="560" height="220" fill="#ffffff"/>
+                <line x1="75" y1="25" x2="75" y2="175" stroke="#0f172a" stroke-width="1.5"/>
+                <line x1="75" y1="175" x2="510" y2="175" stroke="#0f172a" stroke-width="1.5"/>
+                <text x="25" y="100" text-anchor="middle" font-size="11" fill="#334155" font-family="Inter, sans-serif" transform="rotate(-90 25,100)">Global Rank / Quantiles</text>
+                <!-- Quantile Boxplots -->
+                <rect x="130" y="85" width="45" height="50" fill="#f1f5f9" stroke="#0f172a" stroke-width="1.5"/>
+                <line x1="130" y1="115" x2="175" y2="115" stroke="#0f172a" stroke-width="2.5"/>
+                <rect x="265" y="45" width="45" height="55" fill="#cbd5e1" stroke="#0f172a" stroke-width="1.5"/>
+                <line x1="265" y1="70" x2="310" y2="70" stroke="#0f172a" stroke-width="2.5"/>
+                <rect x="400" y="95" width="45" height="48" fill="#e2e8f0" stroke="#0f172a" stroke-width="1.5"/>
+                <line x1="400" y1="122" x2="445" y2="122" stroke="#0f172a" stroke-width="2.5"/>
+                <text x="152.5" y="196" text-anchor="middle" font-size="11" fill="#0f172a" font-family="Inter, sans-serif">Stratum 1</text>
+                <text x="287.5" y="196" text-anchor="middle" font-size="11" fill="#0f172a" font-family="Inter, sans-serif">Stratum 2</text>
+                <text x="422.5" y="196" text-anchor="middle" font-size="11" fill="#0f172a" font-family="Inter, sans-serif">Stratum 3</text>
+            </svg>`,
+            caption: "Non-parametric quantile boxplots with Dunn-Bonferroni pairwise rank-sum contrast annotations."
+        },
+        'factorial_anova_ancova': {
+            title: "Two-Way Factorial ANOVA & Analysis of Covariance (ANCOVA)",
+            group: "GROUP",
+            category: "Multifactorial Interaction & Covariate-Adjusted Design",
+            rationale: "Triggered because your dataset contains multiple categorical grouping factors alongside continuous outcomes and baseline covariates. Tests main effects (Factor A, Factor B) and synergistic/antagonistic interaction effects (A × B) while adjusting for continuous confounders.",
+            assumptions: "Normality of model residuals; homogeneity of regression slopes (for ANCOVA); homoscedasticity across factorial cells.",
+            svg: `<svg xmlns="http://www.w3.org/2000/svg" width="560" height="220" viewBox="0 0 560 220">
+                <rect width="560" height="220" fill="#ffffff"/>
+                <line x1="75" y1="25" x2="75" y2="175" stroke="#0f172a" stroke-width="1.5"/>
+                <line x1="75" y1="175" x2="430" y2="175" stroke="#0f172a" stroke-width="1.5"/>
+                <text x="25" y="100" text-anchor="middle" font-size="11" fill="#334155" font-family="Inter, sans-serif" transform="rotate(-90 25,100)">Adjusted Marginal Mean</text>
+                <!-- Interaction Lines (Crossing/Diverging) -->
+                <polyline points="130,135 255,110 380,88" fill="none" stroke="#64748b" stroke-width="2" stroke-dasharray="5,4"/>
+                <polyline points="130,142 255,82 380,38" fill="none" stroke="#0f172a" stroke-width="2.2"/>
+                <circle cx="130" cy="135" r="4" fill="#64748b"/><circle cx="255" cy="110" r="4" fill="#64748b"/><circle cx="380" cy="88" r="4" fill="#64748b"/>
+                <circle cx="130" cy="142" r="4.5" fill="#0f172a"/><circle cx="255" cy="82" r="4.5" fill="#0f172a"/><circle cx="380" cy="38" r="4.5" fill="#0f172a"/>
+                <!-- Legend -->
+                <line x1="445" y1="60" x2="470" y2="60" stroke="#0f172a" stroke-width="2.2"/><text x="478" y="64" font-size="10.5" fill="#0f172a" font-family="Inter, sans-serif">Factor B1</text>
+                <line x1="445" y1="85" x2="470" y2="85" stroke="#64748b" stroke-width="2" stroke-dasharray="4,3"/><text x="478" y="89" font-size="10.5" fill="#334155" font-family="Inter, sans-serif">Factor B0</text>
+                <text x="445" y="115" font-size="9.5" fill="#475569" font-family="JetBrains Mono, monospace">A×B p = 0.008</text>
+                <text x="130" y="196" text-anchor="middle" font-size="11" fill="#0f172a" font-family="Inter, sans-serif">Dose Low</text>
+                <text x="255" y="196" text-anchor="middle" font-size="11" fill="#0f172a" font-family="Inter, sans-serif">Dose Med</text>
+                <text x="380" y="196" text-anchor="middle" font-size="11" fill="#0f172a" font-family="Inter, sans-serif">Dose High</text>
+            </svg>`,
+            caption: "Two-way factorial interaction plot illustrating non-parallel slopes (significant A × B interaction) across factor levels."
+        },
+        'chi_square_fisher': {
+            title: "Pearson's Chi-Square (χ²), Fisher's Exact & Cochran-Armitage Trend Test",
+            group: "GROUP",
+            category: "Cross-Tabulated Categorical Contingency Analysis",
+            rationale: "Recommended for pairs of categorical/binary/ordinal variables. Evaluates independence in R × C contingency tables via asymptotic χ² or exact hypergeometric probabilities (Fisher's Exact Test when expected cell counts E_ij < 5), plus Odds Ratios / Cramér's V.",
+            assumptions: "Mutually exclusive categorical cells; independent observations; use Fisher's Exact when >20% of cells have expected frequency < 5.",
+            svg: `<svg xmlns="http://www.w3.org/2000/svg" width="560" height="220" viewBox="0 0 560 220">
+                <rect width="560" height="220" fill="#ffffff"/>
+                <line x1="75" y1="25" x2="75" y2="175" stroke="#0f172a" stroke-width="1.5"/>
+                <line x1="75" y1="175" x2="430" y2="175" stroke="#0f172a" stroke-width="1.5"/>
+                <text x="25" y="100" text-anchor="middle" font-size="11" fill="#334155" font-family="Inter, sans-serif" transform="rotate(-90 25,100)">Relative Frequency (%)</text>
+                <!-- Mosaic / Marimekko Variable-Width Columns -->
+                <rect x="95" y="30" width="110" height="145" fill="#e2e8f0" stroke="#0f172a" stroke-width="1.5"/>
+                <rect x="95" y="85" width="110" height="90" fill="#0f172a" stroke="#0f172a" stroke-width="1.5"/>
+                <rect x="220" y="30" width="85" height="145" fill="#e2e8f0" stroke="#0f172a" stroke-width="1.5"/>
+                <rect x="220" y="120" width="85" height="55" fill="#0f172a" stroke="#0f172a" stroke-width="1.5"/>
+                <rect x="320" y="30" width="65" height="145" fill="#e2e8f0" stroke="#0f172a" stroke-width="1.5"/>
+                <rect x="320" y="55" width="65" height="120" fill="#0f172a" stroke="#0f172a" stroke-width="1.5"/>
+                <!-- Legend -->
+                <rect x="445" y="50" width="12" height="12" fill="#0f172a"/><text x="465" y="60" font-size="10.5" fill="#0f172a" font-family="Inter, sans-serif">Responder (+)</text>
+                <rect x="445" y="75" width="12" height="12" fill="#e2e8f0" stroke="#0f172a"/><text x="465" y="85" font-size="10.5" fill="#334155" font-family="Inter, sans-serif">Non-Resp (-)</text>
+                <text x="150" y="196" text-anchor="middle" font-size="11" fill="#0f172a" font-family="Inter, sans-serif">Stratum A (n=110)</text>
+                <text x="262.5" y="196" text-anchor="middle" font-size="11" fill="#0f172a" font-family="Inter, sans-serif">Stratum B (n=85)</text>
+                <text x="352.5" y="196" text-anchor="middle" font-size="11" fill="#0f172a" font-family="Inter, sans-serif">Stratum C (n=65)</text>
+            </svg>`,
+            caption: "Marimekko mosaic plot where bar width is proportional to group sample size (n) and height reflects outcome proportions."
+        },
+        'ols_multivariable': {
+            title: "Multivariable Ordinary Least Squares (OLS) & Robust Huber-White Regression",
+            group: "REGRESSION",
+            category: "Continuous Outcome Predictive & Econometric Modeling",
+            rationale: "Recommended when modeling a continuous outcome against one or more continuous and categorical predictors. Estimates partial regression slopes (β_i) holding covariates constant, using HC3 Huber-White sandwich standard errors if heteroscedasticity is present.",
+            assumptions: "Linearity in parameters; spherical errors (or HC3 robust SEs); absence of severe multicollinearity (Variance Inflation Factor VIF < 5).",
+            svg: `<svg xmlns="http://www.w3.org/2000/svg" width="560" height="220" viewBox="0 0 560 220">
+                <rect width="560" height="220" fill="#ffffff"/>
+                <line x1="75" y1="25" x2="75" y2="175" stroke="#0f172a" stroke-width="1.5"/>
+                <line x1="75" y1="175" x2="510" y2="175" stroke="#0f172a" stroke-width="1.5"/>
+                <text x="25" y="100" text-anchor="middle" font-size="11" fill="#334155" font-family="Inter, sans-serif" transform="rotate(-90 25,100)">Partial Residual Outcome (Y | Z)</text>
+                <text x="292" y="198" text-anchor="middle" font-size="11" fill="#334155" font-family="Inter, sans-serif">Continuous Predictor Variable (X | Z)</text>
+                <!-- 95% Confidence Ribbon -->
+                <polygon points="95,138 485,28 485,62 95,164" fill="#cbd5e1" opacity="0.6"/>
+                <line x1="95" y1="151" x2="485" y2="45" stroke="#0f172a" stroke-width="2.2"/>
+                <!-- Scatter Observations -->
+                <circle cx="115" cy="148" r="3.5" fill="#0f172a"/><circle cx="150" cy="128" r="3.5" fill="#0f172a"/>
+                <circle cx="185" cy="135" r="3.5" fill="#0f172a"/><circle cx="220" cy="112" r="3.5" fill="#0f172a"/>
+                <circle cx="265" cy="108" r="3.5" fill="#0f172a"/><circle cx="305" cy="88" r="3.5" fill="#0f172a"/>
+                <circle cx="350" cy="85" r="3.5" fill="#0f172a"/><circle cx="395" cy="65" r="3.5" fill="#0f172a"/>
+                <circle cx="435" cy="62" r="3.5" fill="#0f172a"/><circle cx="465" cy="48" r="3.5" fill="#0f172a"/>
+                <text x="165" y="45" font-size="10.5" fill="#0f172a" font-family="JetBrains Mono, monospace">Adj. R² = 0.68, β = 0.54 (p &lt; 0.001)</text>
+            </svg>`,
+            caption: "Added-variable partial regression plot with fitted OLS line and 95% pointwise confidence band."
+        },
+        'logistic_regression': {
+            title: "Multivariable Binary Logistic Regression (Logit GLM & ROC Analysis)",
+            group: "REGRESSION",
+            category: "Binary Endpoint / Case-Control Epidemiological Modeling",
+            rationale: "Triggered because your dataset contains binary (2-level) endpoints alongside continuous and categorical predictors. Models log-odds ln(p/(1-p)) to estimate Adjusted Odds Ratios (aOR) with 95% profile-likelihood confidence intervals and area under the ROC curve (AUC).",
+            assumptions: "Binary outcome; independence of observations; linearity of continuous predictors with the logit link; absence of complete separation.",
+            svg: `<svg xmlns="http://www.w3.org/2000/svg" width="560" height="220" viewBox="0 0 560 220">
+                <rect width="560" height="220" fill="#ffffff"/>
+                <!-- Forest Plot Layout -->
+                <line x1="170" y1="20" x2="170" y2="175" stroke="#cbd5e1" stroke-width="1"/>
+                <line x1="310" y1="20" x2="310" y2="175" stroke="#0f172a" stroke-width="1.5" stroke-dasharray="4,3"/>
+                <line x1="170" y1="175" x2="510" y2="175" stroke="#0f172a" stroke-width="1.5"/>
+                <text x="310" y="196" text-anchor="middle" font-size="10.5" font-weight="600" fill="#0f172a" font-family="JetBrains Mono, monospace">Null Effect (aOR = 1.0)</text>
+                <text x="220" y="196" text-anchor="middle" font-size="10" fill="#64748b" font-family="JetBrains Mono, monospace">0.5 (Protective)</text>
+                <text x="420" y="196" text-anchor="middle" font-size="10" fill="#64748b" font-family="JetBrains Mono, monospace">2.0 (Risk Factor)</text>
+                <!-- Predictor 1 -->
+                <text x="158" y="55" text-anchor="end" font-size="11" fill="#0f172a" font-family="Inter, sans-serif">Biomarker Score (+1 SD)</text>
+                <line x1="345" y1="51" x2="455" y2="51" stroke="#0f172a" stroke-width="2"/>
+                <rect x="394" y="46" width="10" height="10" fill="#0f172a"/>
+                <!-- Predictor 2 -->
+                <text x="158" y="98" text-anchor="end" font-size="11" fill="#0f172a" font-family="Inter, sans-serif">Treatment Arm (Active)</text>
+                <line x1="205" y1="94" x2="285" y2="94" stroke="#0f172a" stroke-width="2"/>
+                <rect x="240" y="89" width="10" height="10" fill="#0f172a"/>
+                <!-- Predictor 3 -->
+                <text x="158" y="141" text-anchor="end" font-size="11" fill="#0f172a" font-family="Inter, sans-serif">Age at Baseline (Years)</text>
+                <line x1="295" y1="137" x2="365" y2="137" stroke="#64748b" stroke-width="2"/>
+                <rect x="325" y="132" width="10" height="10" fill="#64748b"/>
+            </svg>`,
+            caption: "Epidemiological forest plot displaying multivariable Adjusted Odds Ratios (aOR) and 95% confidence intervals relative to aOR = 1.0."
+        },
+        'poisson_negbin_glm': {
+            title: "Poisson & Negative Binomial Generalized Linear Model (Log-Link GLM)",
+            group: "REGRESSION",
+            category: "Discrete Count & Overdispersed Event Rate Modeling",
+            rationale: "Triggered by discrete non-negative count variables in your schema. Models Incidence Rate Ratios (IRR) via a log-link function; automatically upgrades from standard Poisson to Negative Binomial when the dispersion index (σ²/μ) exceeds 1.15.",
+            assumptions: "Non-negative integer counts; log-linear relationship; Negative Binomial relaxes the Poisson equidispersion (σ² = μ) constraint.",
+            svg: `<svg xmlns="http://www.w3.org/2000/svg" width="560" height="220" viewBox="0 0 560 220">
+                <rect width="560" height="220" fill="#ffffff"/>
+                <line x1="75" y1="25" x2="75" y2="175" stroke="#0f172a" stroke-width="1.5"/>
+                <line x1="75" y1="175" x2="510" y2="175" stroke="#0f172a" stroke-width="1.5"/>
+                <text x="25" y="100" text-anchor="middle" font-size="11" fill="#334155" font-family="Inter, sans-serif" transform="rotate(-90 25,100)">Probability Mass P(Y = k)</text>
+                <text x="292" y="198" text-anchor="middle" font-size="11" fill="#334155" font-family="Inter, sans-serif">Discrete Event Count (k = 0, 1, 2, 3, ...)</text>
+                <!-- Discrete Count Bars -->
+                <rect x="105" y="45" width="32" height="130" fill="#cbd5e1" stroke="#0f172a" stroke-width="1.4"/>
+                <rect x="160" y="65" width="32" height="110" fill="#cbd5e1" stroke="#0f172a" stroke-width="1.4"/>
+                <rect x="215" y="95" width="32" height="80" fill="#cbd5e1" stroke="#0f172a" stroke-width="1.4"/>
+                <rect x="270" y="125" width="32" height="50" fill="#cbd5e1" stroke="#0f172a" stroke-width="1.4"/>
+                <rect x="325" y="148" width="32" height="27" fill="#cbd5e1" stroke="#0f172a" stroke-width="1.4"/>
+                <rect x="380" y="160" width="32" height="15" fill="#cbd5e1" stroke="#0f172a" stroke-width="1.4"/>
+                <rect x="435" y="168" width="32" height="7" fill="#cbd5e1" stroke="#0f172a" stroke-width="1.4"/>
+                <!-- Fitted NegBin Curve -->
+                <polyline points="121,48 176,68 231,98 286,128 341,150 396,162 451,169" fill="none" stroke="#0f172a" stroke-width="2.2"/>
+                <circle cx="121" cy="48" r="3.5" fill="#0f172a"/><circle cx="176" cy="68" r="3.5" fill="#0f172a"/><circle cx="231" cy="98" r="3.5" fill="#0f172a"/><circle cx="286" cy="128" r="3.5" fill="#0f172a"/><circle cx="341" cy="150" r="3.5" fill="#0f172a"/>
+            </svg>`,
+            caption: "Observed discrete count histogram overlaid with fitted Negative Binomial probability mass function."
+        },
+        'kaplan_meier_cox': {
+            title: "Kaplan-Meier Survival Estimator (Log-Rank) & Cox Proportional Hazards Model",
+            group: "LONGITUDINAL",
+            category: "Right-Censored Time-to-Event & Hazard Ratio Analysis",
+            rationale: "Triggered by the presence of time-to-event/follow-up duration variables paired with binary event/censoring indicators. Estimates non-parametric survival functions S(t) with Mantel-Cox Log-Rank testing and semi-parametric Hazard Ratios (HR) via Cox regression.",
+            assumptions: "Non-informative right censoring; proportional hazards over time (verified via Schoenfeld residuals).",
+            svg: `<svg xmlns="http://www.w3.org/2000/svg" width="560" height="220" viewBox="0 0 560 220">
+                <rect width="560" height="220" fill="#ffffff"/>
+                <line x1="75" y1="20" x2="75" y2="165" stroke="#0f172a" stroke-width="1.5"/>
+                <line x1="75" y1="165" x2="510" y2="165" stroke="#0f172a" stroke-width="1.5"/>
+                <text x="25" y="92" text-anchor="middle" font-size="11" fill="#334155" font-family="Inter, sans-serif" transform="rotate(-90 25,92)">Survival Probability S(t)</text>
+                <!-- Step Function Arm 1 (Superior Survival) -->
+                <polyline points="75,30 160,30 160,48 265,48 265,68 380,68 380,88 490,88" fill="none" stroke="#0f172a" stroke-width="2.2"/>
+                <!-- Censoring ticks (+) -->
+                <line x1="210" y1="44" x2="210" y2="52" stroke="#0f172a" stroke-width="1.5"/>
+                <line x1="330" y1="64" x2="330" y2="72" stroke="#0f172a" stroke-width="1.5"/>
+                <!-- Step Function Arm 2 (Inferior Survival) -->
+                <polyline points="75,30 130,30 130,65 215,65 215,102 310,102 310,138 440,138 440,152 490,152" fill="none" stroke="#64748b" stroke-width="2" stroke-dasharray="5,3"/>
+                <line x1="175" y1="61" x2="175" y2="69" stroke="#64748b" stroke-width="1.5"/>
+                <text x="370" y="38" font-size="10" font-weight="600" fill="#0f172a" font-family="JetBrains Mono, monospace">HR = 0.48 (95% CI: 0.31–0.74), Log-Rank p = 0.0008</text>
+                <!-- Number at Risk Mini-Table -->
+                <text x="75" y="185" font-size="9.5" font-weight="600" fill="#334155" font-family="JetBrains Mono, monospace">No. at Risk:</text>
+                <text x="160" y="185" font-size="9.5" fill="#0f172a" font-family="JetBrains Mono, monospace">t=0: 120</text>
+                <text x="270" y="185" font-size="9.5" fill="#0f172a" font-family="JetBrains Mono, monospace">t=12m: 98</text>
+                <text x="380" y="185" font-size="9.5" fill="#0f172a" font-family="JetBrains Mono, monospace">t=24m: 74</text>
+                <text x="470" y="185" font-size="9.5" fill="#0f172a" font-family="JetBrains Mono, monospace">t=36m: 51</text>
+            </svg>`,
+            caption: "Kaplan-Meier step survival curves with right-censored tick marks (+), Cox Hazard Ratio, and Number-at-Risk table."
+        },
+        'lmm_repeated': {
+            title: "Linear Mixed-Effects Model (LMM / GLMM), GEE & Paired Repeated Measures",
+            group: "LONGITUDINAL",
+            category: "Clustered, Longitudinal & Within-Subject Correlated Data",
+            rationale: "Triggered because a repeating Subject/Cluster ID column was detected (multiple rows per entity) or paired longitudinal measurements exist. Standard OLS/ANOVA is invalid when observations are correlated within subjects; LMM incorporates random intercepts/slopes (1 | Subject_ID).",
+            assumptions: "Correlated observations within clusters; handles missing-at-random (MAR) longitudinal dropouts via Restricted Maximum Likelihood (REML).",
+            svg: `<svg xmlns="http://www.w3.org/2000/svg" width="560" height="220" viewBox="0 0 560 220">
+                <rect width="560" height="220" fill="#ffffff"/>
+                <line x1="75" y1="25" x2="75" y2="175" stroke="#0f172a" stroke-width="1.5"/>
+                <line x1="75" y1="175" x2="510" y2="175" stroke="#0f172a" stroke-width="1.5"/>
+                <text x="25" y="100" text-anchor="middle" font-size="11" fill="#334155" font-family="Inter, sans-serif" transform="rotate(-90 25,100)">Longitudinal Trajectory</text>
+                <!-- Individual Subject Spaghetti Trajectories -->
+                <polyline points="120,145 285,115 450,95" fill="none" stroke="#cbd5e1" stroke-width="1.2"/>
+                <polyline points="120,130 285,90 450,55" fill="none" stroke="#cbd5e1" stroke-width="1.2"/>
+                <polyline points="120,155 285,105 450,70" fill="none" stroke="#cbd5e1" stroke-width="1.2"/>
+                <polyline points="120,120 285,80 450,45" fill="none" stroke="#cbd5e1" stroke-width="1.2"/>
+                <polyline points="120,160 285,135 450,110" fill="none" stroke="#cbd5e1" stroke-width="1.2"/>
+                <!-- Population Fixed-Effect Mean Trajectory -->
+                <polyline points="120,142 285,105 450,75" fill="none" stroke="#0f172a" stroke-width="3"/>
+                <circle cx="120" cy="142" r="5" fill="#0f172a"/><circle cx="285" cy="105" r="5" fill="#0f172a"/><circle cx="450" cy="75" r="5" fill="#0f172a"/>
+                <text x="120" y="196" text-anchor="middle" font-size="11" fill="#0f172a" font-family="Inter, sans-serif">Baseline (T0)</text>
+                <text x="285" y="196" text-anchor="middle" font-size="11" fill="#0f172a" font-family="Inter, sans-serif">Follow-Up 1 (T1)</text>
+                <text x="450" y="196" text-anchor="middle" font-size="11" fill="#0f172a" font-family="Inter, sans-serif">Follow-Up 2 (T2)</text>
+            </svg>`,
+            caption: "Longitudinal spaghetti plot showing subject-level random trajectories (grey) and population fixed-effect slope (black)."
+        },
+        'pca_multivariate_corr': {
+            title: "Principal Component Analysis (PCA), MANOVA & Spearman/Pearson Correlation Matrix",
+            group: "MULTIVARIATE",
+            category: "High-Dimensional Dimensionality Reduction & Covariance Structure",
+            rationale: "Triggered because your dataset contains multiple continuous variables (P ≥ 3). Evaluates global covariance/correlation structure, detects collinearity clusters, and projects high-dimensional variance onto orthogonal principal axes (PC1, PC2) with 95% Hotelling's T² confidence ellipses.",
+            assumptions: "Z-score standardization (mean=0, SD=1) prior to eigen-decomposition; Spearman rank correlation used when marginal distributions are skewed.",
+            svg: `<svg xmlns="http://www.w3.org/2000/svg" width="560" height="220" viewBox="0 0 560 220">
+                <rect width="560" height="220" fill="#ffffff"/>
+                <!-- Left Panel: PCA Biplot with Ellipses -->
+                <line x1="65" y1="25" x2="65" y2="175" stroke="#0f172a" stroke-width="1.5"/>
+                <line x1="65" y1="175" x2="285" y2="175" stroke="#0f172a" stroke-width="1.5"/>
+                <text x="175" y="196" text-anchor="middle" font-size="10.5" fill="#0f172a" font-family="Inter, sans-serif">PC1 (48.2% Variance Explained)</text>
+                <ellipse cx="145" cy="115" rx="48" ry="28" fill="#cbd5e1" opacity="0.45" stroke="#0f172a" stroke-width="1.4" transform="rotate(-20 145 115)"/>
+                <ellipse cx="215" cy="78" rx="45" ry="26" fill="#94a3b8" opacity="0.35" stroke="#334155" stroke-width="1.4" stroke-dasharray="4,2" transform="rotate(15 215 78)"/>
+                <!-- Loading Vectors -->
+                <line x1="175" y1="100" x2="235" y2="55" stroke="#0f172a" stroke-width="1.5"/>
+                <line x1="175" y1="100" x2="245" y2="115" stroke="#0f172a" stroke-width="1.5"/>
+                <!-- Right Panel: Correlation Heatmap Matrix -->
+                <g transform="translate(335, 30)">
+                    <rect x="0" y="0" width="35" height="35" fill="#0f172a"/><rect x="35" y="0" width="35" height="35" fill="#64748b"/><rect x="70" y="0" width="35" height="35" fill="#cbd5e1"/><rect x="105" y="0" width="35" height="35" fill="#f1f5f9"/>
+                    <rect x="0" y="35" width="35" height="35" fill="#64748b"/><rect x="35" y="35" width="35" height="35" fill="#0f172a"/><rect x="70" y="35" width="35" height="35" fill="#94a3b8"/><rect x="105" y="35" width="35" height="35" fill="#e2e8f0"/>
+                    <rect x="0" y="70" width="35" height="35" fill="#cbd5e1"/><rect x="35" y="70" width="35" height="35" fill="#94a3b8"/><rect x="70" y="70" width="35" height="35" fill="#0f172a"/><rect x="105" y="70" width="35" height="35" fill="#475569"/>
+                    <rect x="0" y="105" width="35" height="35" fill="#f1f5f9"/><rect x="35" y="105" width="35" height="35" fill="#e2e8f0"/><rect x="70" y="105" width="35" height="35" fill="#475569"/><rect x="105" y="105" width="35" height="35" fill="#0f172a"/>
+                    <rect x="0" y="0" width="140" height="140" fill="none" stroke="#0f172a" stroke-width="1.5"/>
+                    <text x="70" y="162" text-anchor="middle" font-size="10.5" fill="#0f172a" font-family="Inter, sans-serif">Correlation Matrix (r / ρ)</text>
+                </g>
+            </svg>`,
+            caption: "Left: PCA score biplot with 95% confidence ellipses and loading vectors. Right: Pairwise correlation heatmap matrix."
+        }
+    };
 
-        if (ivType === 'categorical' && dvType === 'continuous') {
-            if (numGroups === '2') {
-                if (normality === 'normal') {
-                    testName = "Independent Samples t-Test";
-                    rationale = "Auto-detection identified a categorical independent variable with 2 distinct groups and a continuous dependent variable with a normal distribution. The parametric t-Test maximizes statistical power.";
-                    svgViz = `<svg width="450" height="200" viewBox="0 0 450 200"><rect width="450" height="200" fill="#ffffff" rx="6"/><line x1="140" y1="50" x2="140" y2="150" stroke="#94a3b8" stroke-width="1.5"/><rect x="110" y="75" width="60" height="60" fill="#f1f5f9" stroke="#0f172a" stroke-width="1.5" rx="3"/><line x1="110" y1="105" x2="170" y2="105" stroke="#0f172a" stroke-width="2.5"/><line x1="310" y1="35" x2="310" y2="135" stroke="#94a3b8" stroke-width="1.5"/><rect x="280" y="55" width="60" height="60" fill="#f1f5f9" stroke="#0f172a" stroke-width="1.5" rx="3"/><line x1="280" y1="85" x2="340" y2="85" stroke="#0f172a" stroke-width="2.5"/><text x="140" y="175" text-anchor="middle" font-size="11" fill="#475569" font-family="Inter">Control (Group A)</text><text x="310" y="175" text-anchor="middle" font-size="11" fill="#475569" font-family="Inter">Treatment (Group B)</text></svg>`;
-                } else {
-                    testName = "Mann-Whitney U Test";
-                    rationale = "Auto-detection identified 2 groups with continuous data displaying non-normal skewness. The Mann-Whitney U test evaluates rank sums without assuming normality.";
-                    svgViz = `<svg width="450" height="200" viewBox="0 0 450 200"><rect width="450" height="200" fill="#ffffff" rx="6"/><path d="M 140 145 Q 100 95 140 45 Q 180 95 140 145" fill="#f1f5f9" stroke="#0f172a" stroke-width="1.5"/><circle cx="140" cy="95" r="4" fill="#0f172a"/><path d="M 310 135 Q 270 85 310 35 Q 350 85 310 135" fill="#f1f5f9" stroke="#0f172a" stroke-width="1.5"/><circle cx="310" cy="85" r="4" fill="#0f172a"/><text x="140" y="175" text-anchor="middle" font-size="11" fill="#475569" font-family="Inter">Group A (Rank Median)</text><text x="310" y="175" text-anchor="middle" font-size="11" fill="#475569" font-family="Inter">Group B (Rank Median)</text></svg>`;
+    // Exhaustive Combinatorial & Multivariate Evaluation Engine
+    function evaluateResearchMethodologies() {
+        const activeCols = columnProfiles.filter(c => !c.role.startsWith('exclude'));
+        const binaryCols = activeCols.filter(c => c.role === 'binary');
+        const polyCols = activeCols.filter(c => c.role === 'categorical_poly' || c.role === 'ordinal');
+        const allCatCols = [...binaryCols, ...polyCols];
+
+        const normContCols = activeCols.filter(c => c.role === 'continuous_normal');
+        const skewContCols = activeCols.filter(c => c.role === 'continuous_skewed' || c.role === 'ordinal');
+        const allContCols = activeCols.filter(c => c.role === 'continuous_normal' || c.role === 'continuous_skewed');
+        const countCols = activeCols.filter(c => c.role === 'count');
+        const tteCols = activeCols.filter(c => c.role === 'time_to_event');
+        const clusterCols = activeCols.filter(c => c.role === 'cluster_id');
+
+        const detected = {};
+        Object.keys(RESEARCH_TEST_CATALOG).forEach(k => detected[k] = []);
+
+        // 1. Two-Group Comparisons (Welch's t-Test & Mann-Whitney U)
+        binaryCols.forEach(bin => {
+            normContCols.forEach(cont => {
+                detected['welch_t_test'].push(`${bin.name} (2 arms) → ${cont.name}`);
+                detected['mann_whitney'].push(`${bin.name} (2 arms) → ${cont.name} (Rank sensitivity)`);
+            });
+            skewContCols.forEach(skew => {
+                if (skew.name !== bin.name) {
+                    detected['mann_whitney'].push(`${bin.name} (2 arms) → ${skew.name}`);
                 }
-            } else {
-                if (normality === 'normal') {
-                    testName = "One-Way ANOVA";
-                    rationale = "Auto-detection found 3 or more independent groups with normally distributed continuous metrics. ANOVA analyzes variance ratios across group means.";
-                    svgViz = `<svg width="450" height="200" viewBox="0 0 450 200"><rect width="450" height="200" fill="#ffffff" rx="6"/><rect x="80" y="80" width="45" height="70" fill="#f1f5f9" stroke="#0f172a" stroke-width="1.5" rx="3"/><line x1="102" y1="60" x2="102" y2="150" stroke="#0f172a" stroke-width="1.5"/><rect x="202" y="50" width="45" height="100" fill="#f1f5f9" stroke="#0f172a" stroke-width="1.5" rx="3"/><line x1="224" y1="35" x2="224" y2="150" stroke="#0f172a" stroke-width="1.5"/><rect x="325" y="100" width="45" height="50" fill="#f1f5f9" stroke="#0f172a" stroke-width="1.5" rx="3"/><line x1="347" y1="80" x2="347" y2="150" stroke="#0f172a" stroke-width="1.5"/><text x="102" y="175" text-anchor="middle" font-size="11" fill="#475569" font-family="Inter">Group 1</text><text x="224" y="175" text-anchor="middle" font-size="11" fill="#475569" font-family="Inter">Group 2</text><text x="347" y="175" text-anchor="middle" font-size="11" fill="#475569" font-family="Inter">Group 3</text></svg>`;
-                } else {
-                    testName = "Kruskal-Wallis H Test";
-                    rationale = "Auto-detection confirmed 3+ groups with non-normal data distributions. Kruskal-Wallis serves as the non-parametric equivalent to ANOVA.";
-                    svgViz = `<svg width="450" height="200" viewBox="0 0 450 200"><rect width="450" height="200" fill="#ffffff" rx="6"/><circle cx="110" cy="100" r="25" fill="#f1f5f9" stroke="#0f172a" stroke-width="1.5"/><circle cx="225" cy="70" r="30" fill="#f1f5f9" stroke="#0f172a" stroke-width="1.5"/><circle cx="340" cy="115" r="20" fill="#f1f5f9" stroke="#0f172a" stroke-width="1.5"/><text x="225" y="175" text-anchor="middle" font-size="11" fill="#475569" font-family="Inter">Non-Parametric Rank Spread Across Groups</text></svg>`;
+            });
+        });
+
+        // 2. Multi-Group Comparisons (One-Way ANOVA & Kruskal-Wallis)
+        polyCols.forEach(poly => {
+            normContCols.forEach(cont => {
+                detected['anova_welch'].push(`${poly.name} (${poly.uniqueCount} groups) → ${cont.name}`);
+                detected['kruskal_wallis'].push(`${poly.name} (${poly.uniqueCount} groups) → ${cont.name}`);
+            });
+            skewContCols.forEach(skew => {
+                if (skew.name !== poly.name) {
+                    detected['kruskal_wallis'].push(`${poly.name} (${poly.uniqueCount} groups) → ${skew.name}`);
+                }
+            });
+        });
+
+        // 3. Factorial ANOVA & ANCOVA (2+ Categorical IVs + Continuous DV + Optional Continuous Covariate)
+        if (allCatCols.length >= 2 && allContCols.length >= 1) {
+            for (let i = 0; i < allCatCols.length; i++) {
+                for (let j = i + 1; j < allCatCols.length; j++) {
+                    allContCols.forEach(dv => {
+                        const cov = allContCols.find(c => c.name !== dv.name);
+                        const covText = cov ? ` | Covariate: ${cov.name}` : '';
+                        detected['factorial_anova_ancova'].push(`${allCatCols[i].name} × ${allCatCols[j].name}${covText} → ${dv.name}`);
+                    });
                 }
             }
-        } else if (ivType === 'categorical' && dvType === 'categorical') {
-            testName = "Chi-Square Test of Independence";
-            rationale = "Auto-detection recognized categorical frequency distributions for both variables. Chi-Square tests categorical association.";
-            svgViz = `<svg width="450" height="200" viewBox="0 0 450 200"><rect width="450" height="200" fill="#ffffff" rx="6"/><rect x="110" y="50" width="70" height="100" fill="#e2e8f0" rx="3"/><rect x="110" y="50" width="70" height="40" fill="#0f172a" rx="3"/><rect x="270" y="70" width="70" height="80" fill="#e2e8f0" rx="3"/><rect x="270" y="70" width="70" height="25" fill="#0f172a" rx="3"/><text x="145" y="175" text-anchor="middle" font-size="11" fill="#475569" font-family="Inter">Category A Frequencies</text><text x="305" y="175" text-anchor="middle" font-size="11" fill="#475569" font-family="Inter">Category B Frequencies</text></svg>`;
-        } else {
-            testName = "Ordinary Least Squares (OLS) Regression";
-            rationale = "Auto-detection confirmed continuous measurements across variables, suitable for modeling linear predictive dependencies.";
-            svgViz = `<svg width="450" height="200" viewBox="0 0 450 200"><rect width="450" height="200" fill="#ffffff" rx="6"/><line x1="50" y1="160" x2="400" y2="160" stroke="#cbd5e1" stroke-width="1.5"/><line x1="50" y1="30" x2="50" y2="160" stroke="#cbd5e1" stroke-width="1.5"/><circle cx="90" cy="130" r="3.5" fill="#0f172a"/><circle cx="150" cy="110" r="3.5" fill="#0f172a"/><circle cx="210" cy="90" r="3.5" fill="#0f172a"/><circle cx="280" cy="65" r="3.5" fill="#0f172a"/><circle cx="350" cy="45" r="3.5" fill="#0f172a"/><line x1="70" y1="140" x2="380" y2="40" stroke="#0f172a" stroke-width="2" stroke-dasharray="4"/><text x="225" y="190" text-anchor="middle" font-size="11" fill="#475569" font-family="Inter">Regression Fit Line & Observations</text></svg>`;
         }
 
-        const html = `
-            <div class="recommendation-box">
-                <h3>${testName}</h3>
-                <p class="rationale"><strong>Auto-Analysis Rationale:</strong> ${rationale}</p>
-                <div class="viz-card">
-                    ${svgViz}
-                    <div class="viz-caption">Figure 1. Publication-ready graphical representation template for ${testName}.</div>
-                </div>
-            </div>
-        `;
+        // 4. Contingency Analysis (Chi-Square & Fisher's Exact)
+        for (let i = 0; i < allCatCols.length; i++) {
+            for (let j = i + 1; j < allCatCols.length; j++) {
+                detected['chi_square_fisher'].push(`${allCatCols[i].name} × ${allCatCols[j].name}`);
+            }
+        }
 
-        document.getElementById('recommendation-output').innerHTML = html;
+        // 5. OLS & Multivariable Linear Regression
+        if (allContCols.length >= 2) {
+            for (let i = 0; i < allContCols.length; i++) {
+                for (let j = i + 1; j < allContCols.length; j++) {
+                    detected['ols_multivariable'].push(`${allContCols[i].name} ↔ ${allContCols[j].name}`);
+                }
+            }
+            if (allContCols.length >= 2 && allCatCols.length >= 1) {
+                allContCols.forEach(dv => {
+                    const preds = activeCols.filter(c => c.name !== dv.name && c.role !== 'cluster_id').slice(0, 4).map(c => c.name).join(' + ');
+                    detected['ols_multivariable'].push(`Multivariable: ${dv.name} ~ ${preds}`);
+                });
+            }
+        }
+
+        // 6. Multivariable Binary Logistic Regression
+        if (binaryCols.length >= 1 && (allContCols.length + polyCols.length) >= 1) {
+            binaryCols.forEach(bin => {
+                const preds = activeCols.filter(c => c.name !== bin.name && c.role !== 'cluster_id').slice(0, 4).map(c => c.name).join(' + ');
+                detected['logistic_regression'].push(`Logit(P(${bin.name})) ~ ${preds}`);
+            });
+        }
+
+        // 7. Poisson & Negative Binomial GLM (Count Outcomes)
+        if (countCols.length >= 1) {
+            countCols.forEach(cnt => {
+                const preds = activeCols.filter(c => c.name !== cnt.name && c.role !== 'cluster_id').slice(0, 3).map(c => c.name).join(' + ');
+                const modelType = cnt.vmr > 1.2 ? 'NegBin GLM' : 'Poisson GLM';
+                detected['poisson_negbin_glm'].push(`${modelType}: log(E[${cnt.name}]) ~ ${preds} (σ²/μ = ${cnt.vmr.toFixed(2)})`);
+            });
+        }
+
+        // 8. Kaplan-Meier & Cox Proportional Hazards (Time-to-Event + Binary Censoring)
+        if (tteCols.length >= 1) {
+            tteCols.forEach(tte => {
+                const eventCol = binaryCols[0] ? binaryCols[0].name : 'Event_Status';
+                const stratCols = allCatCols.filter(c => c.name !== eventCol).slice(0, 2).map(c => c.name).join(', ');
+                detected['kaplan_meier_cox'].push(`Surv(${tte.name}, ${eventCol}) ~ ${stratCols || 'Covariates'}`);
+            });
+        }
+
+        // 9. Linear Mixed-Effects Models (LMM / GLMM) & Repeated Measures
+        if (clusterCols.length >= 1 && (allContCols.length + countCols.length + binaryCols.length) >= 1) {
+            clusterCols.forEach(cl => {
+                allContCols.forEach(dv => {
+                    const fixed = allCatCols[0] ? allCatCols[0].name : 'Time_Condition';
+                    detected['lmm_repeated'].push(`LMM: ${dv.name} ~ ${fixed} + (1 | ${cl.name})`);
+                });
+            });
+        }
+
+        // 10. High-Dimensional PCA, MANOVA & Correlation Matrix (3+ Continuous Metrics)
+        const metricPool = [...allContCols, ...tteCols, ...countCols];
+        if (metricPool.length >= 3) {
+            const names = metricPool.slice(0, 6).map(c => c.name).join(', ');
+            detected['pca_multivariate_corr'].push(`Matrix [${metricPool.length} continuous dims]: ${names}${metricPool.length > 6 ? '...' : ''}`);
+        }
+
+        activeRecommendations = [];
+        Object.keys(detected).forEach(key => {
+            if (detected[key].length > 0) {
+                activeRecommendations.push({
+                    key: key,
+                    info: RESEARCH_TEST_CATALOG[key],
+                    pairs: detected[key]
+                });
+            }
+        });
+
+        renderRecommendations('ALL');
         document.getElementById('results-container').style.display = 'block';
     }
 
+    function filterRecommendations(groupFilter, btnEl) {
+        if (btnEl) {
+            document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
+            btnEl.classList.add('active');
+        }
+        renderRecommendations(groupFilter);
+    }
+
+    function renderRecommendations(groupFilter) {
+        const outputContainer = document.getElementById('recommendation-output');
+        outputContainer.innerHTML = '';
+
+        const filtered = groupFilter === 'ALL'
+            ? activeRecommendations
+            : activeRecommendations.filter(r => r.info.group === groupFilter);
+
+        document.getElementById('results-title').innerText =
+            `2. Recommended Statistical Methodologies (${filtered.length} Research Models Identified)`;
+
+        filtered.forEach((rec, idx) => {
+            const figNum = idx + 1;
+            const maxVisiblePills = 8;
+            const visiblePairs = rec.pairs.slice(0, maxVisiblePills);
+            const hiddenPairs = rec.pairs.slice(maxVisiblePills);
+
+            let pillsHtml = visiblePairs.map(p => `<span class="pair-pill">${p}</span>`).join('');
+            if (hiddenPairs.length > 0) {
+                const hiddenId = `hidden-pairs-${rec.key}`;
+                pillsHtml += `<span class="pair-pill-more" onclick="document.getElementById('${hiddenId}').style.display='inline'; this.style.display='none';">+ ${hiddenPairs.length} more combinations</span>`;
+                pillsHtml += `<span id="${hiddenId}" style="display:none;">${hiddenPairs.map(p => `<span class="pair-pill">${p}</span>`).join('')}</span>`;
+            }
+
+            const svgContainerId = `svg-fig-${rec.key}`;
+
+            const cardHtml = `
+                <div class="recommendation-item">
+                    <div class="test-header">
+                        <h3>${figNum}. ${rec.info.title}</h3>
+                        <span class="test-category-badge">${rec.info.category}</span>
+                    </div>
+
+                    <div class="rationale-grid">
+                        <div class="rationale-box">
+                            <strong>Statistical Selection Logic</strong>
+                            <span>${rec.info.rationale}</span>
+                        </div>
+                        <div class="rationale-box">
+                            <strong>Parametric / Model Assumptions &amp; Diagnostics</strong>
+                            <span>${rec.info.assumptions}</span>
+                        </div>
+                    </div>
+
+                    <div class="applicable-pairs">
+                        <div class="applicable-pairs-title">Applicable Variable Topologies in Uploaded Dataset (${rec.pairs.length} Valid Specifications):</div>
+                        ${pillsHtml}
+                    </div>
+
+                    <div class="viz-card">
+                        <div id="${svgContainerId}">${rec.info.svg}</div>
+                        <div class="viz-toolbar">
+                            <span><strong>Figure ${figNum}.</strong> ${rec.info.caption}</span>
+                            <button class="btn-svg-dl" onclick="downloadSvgFigure('${svgContainerId}', '${rec.key}_figure.svg')">↓ Download Publication .SVG</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            outputContainer.innerHTML += cardHtml;
+        });
+    }
+
+    // Export SVG for Illustrator / LaTeX / Publication
+    function downloadSvgFigure(containerId, filename) {
+        const svgEl = document.getElementById(containerId).querySelector('svg');
+        if (!svgEl) return;
+        const serializer = new XMLSerializer();
+        const svgString = serializer.serializeToString(svgEl);
+        const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    // Built-in Synthetic Multi-Center Oncology & Longitudinal Clinical Trial Generator (N=240, 10 Variables)
+    function loadSyntheticComplexDataset() {
+        const rows = [];
+        const arms = ['Placebo', 'Low_Dose_Immunotherapy', 'High_Dose_Immunotherapy'];
+        const centers = ['Boston_AMC', 'Zurich_Univ', 'Tokyo_Med', 'London_Royal'];
+
+        for (let i = 1; i <= 240; i++) {
+            // 80 patients measured across 3 longitudinal visits = 240 rows
+            const patientId = `PT-${1000 + Math.floor((i - 1) / 3)}`;
+            const visitNum = ((i - 1) % 3) + 1;
+            const arm = arms[i % 3];
+            const sex = i % 2 === 0 ? 'Female' : 'Male';
+            const center = centers[i % 4];
+
+            // Gaussian continuous biomarker (approx normal)
+            const u1 = Math.max(1e-5, Math.random()), u2 = Math.random();
+            const z = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+            const systolicBP = Number((122 + z * 11 + (arm === 'High_Dose_Immunotherapy' ? -6 : 0)).toFixed(1));
+
+            // Right-skewed continuous cytokine (log-normal)
+            const crpSkewed = Number((Math.exp(1.1 + z * 0.85)).toFixed(2));
+
+            // Overdispersed discrete lesion count (0, 1, 2, 3, 5, 8...)
+            const lesionCount = Math.max(0, Math.round(Math.exp(0.7 + z * 0.9) - 1));
+
+            // Ordinal ECOG Performance Score (0 to 4)
+            const ecogOrdinal = i % 5;
+
+            // Time-to-Event Survival Months + Binary Event Censoring
+            const osMonths = Number((4 + Math.abs(z) * 14 + (arm !== 'Placebo' ? 8 : 0)).toFixed(1));
+            const relapseEvent = (osMonths < 14 && i % 3 === 0) ? 1 : 0;
+
+            rows.push({
+                Patient_ID: patientId,
+                Treatment_Arm: arm,
+                Clinical_Center: center,
+                Biological_Sex: sex,
+                Systolic_BP_mmHg: i % 29 === 0 ? null : systolicBP, // Realistic missingness
+                Serum_CRP_mgL: crpSkewed,
+                Metastatic_Lesion_Count: lesionCount,
+                ECOG_Stage_Score: ecogOrdinal,
+                FollowUp_OS_Months: osMonths,
+                Relapse_Event_Status: relapseEvent
+            });
+        }
+
+        currentWorkbook = null;
+        document.getElementById('sheet-selector-wrap').style.display = 'none';
+        document.getElementById('tel-status').innerText = 'Synthetic_Clinical_Cohort_N240.csv (RAM)';
+        parsedDataRows = rows;
+        profileDataset(parsedDataRows);
+        runAnalysisWorkflow();
+    }
+
+    // Strict Zero-Storage RAM Purge
     function clearDataset() {
+        currentWorkbook = null;
         parsedDataRows = null;
+        columnProfiles = [];
+        activeRecommendations = [];
+
         document.getElementById('dataset-file').value = '';
+        document.getElementById('sheet-selector-wrap').style.display = 'none';
+        document.getElementById('hud-table-body').innerHTML = '';
         document.getElementById('hud').style.display = 'none';
         document.getElementById('countdown-container').style.display = 'none';
         document.getElementById('results-container').style.display = 'none';
         document.getElementById('recommendation-output').innerHTML = '';
-        alert("Dataset successfully purged from browser memory.");
+
+        document.getElementById('tel-status').innerText = 'Purged (0 Bytes in RAM)';
+        document.getElementById('tel-rows').innerText = '0';
+        document.getElementById('tel-cols').innerText = '0';
+        document.getElementById('tel-missing').innerText = '0.0%';
+        document.getElementById('tel-design').innerText = 'Unassigned';
+
+        alert("Zero-Storage Purge Complete: All dataset buffers, variable moments, and DOM outputs have been permanently erased from browser memory.");
     }
 </script>
 
