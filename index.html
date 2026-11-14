@@ -3,36 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StatTest Recommender | Zero-Storage Statistical Advisor</title>
-    <!-- Google Fonts & PapaParse for Client-Side CSV Parsing -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>StatTest Recommender | Automated Statistical Advisor</title>
+    <!-- Google Fonts & Parsing Libraries -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         :root {
-            --primary: #2563eb;
-            --primary-dark: #1d4ed8;
-            --bg-color: #f8fafc;
+            --bg-canvas: #f8fafc;
             --card-bg: #ffffff;
-            --text-main: #1e293b;
-            --text-muted: #64748b;
-            --border: #e2e8f0;
-            --danger: #dc2626;
-            --danger-hover: #b91c1c;
-            --success: #16a34a;
+            --text-main: #0f172a;
+            --text-muted: #475569;
+            --border-color: #cbd5e1;
+            --accent: #1e293b;
+            --accent-hover: #0f172a;
+            --danger-bg: #fef2f2;
+            --danger-text: #991b1b;
+            --success-bg: #f0fdf4;
+            --success-text: #166534;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             font-family: 'Inter', sans-serif;
-            background-color: var(--bg-color);
+            background-color: var(--bg-canvas);
             color: var(--text-main);
             line-height: 1.6;
-            padding: 2rem 1rem;
+            padding: 3rem 1rem;
         }
 
         .container {
-            max-width: 900px;
+            max-width: 800px;
             margin: 0 auto;
         }
 
@@ -42,161 +44,169 @@
         }
 
         header h1 {
-            font-size: 2.25rem;
+            font-size: 2rem;
+            font-weight: 600;
             color: var(--text-main);
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.4rem;
+            letter-spacing: -0.025em;
         }
 
         header p {
             color: var(--text-muted);
-            font-size: 1.05rem;
+            font-size: 0.95rem;
         }
 
-        .badge-privacy {
+        .privacy-badge {
             display: inline-block;
-            background: #dcfce7;
-            color: #166534;
-            padding: 0.25rem 0.75rem;
+            background: var(--success-bg);
+            color: var(--success-text);
+            padding: 0.3rem 0.8rem;
             border-radius: 9999px;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: 500;
             margin-top: 0.75rem;
+            border: 1px solid #bbf7d0;
         }
 
         .card {
             background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
             padding: 2rem;
             margin-bottom: 1.5rem;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05);
         }
 
         h2 {
-            font-size: 1.25rem;
+            font-size: 1.1rem;
+            font-weight: 600;
             margin-bottom: 1rem;
             color: var(--text-main);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
+            letter-spacing: -0.01em;
         }
 
-        textarea {
-            width: 100%;
-            height: 150px;
-            padding: 1rem;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            font-family: monospace;
-            font-size: 0.9rem;
-            resize: vertical;
+        .upload-zone {
+            border: 2px dashed var(--border-color);
+            padding: 2rem 1.5rem;
+            border-radius: 6px;
+            text-align: center;
+            background: #ffffff;
+            cursor: pointer;
+            transition: border-color 0.2s;
             margin-bottom: 1rem;
         }
 
-        textarea:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        .upload-zone:hover {
+            border-color: var(--accent);
+        }
+
+        input[type="file"] {
+            font-size: 0.9rem;
+            color: var(--text-muted);
         }
 
         .button-group {
             display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
         }
 
         button {
-            padding: 0.75rem 1.5rem;
-            font-weight: 600;
-            border-radius: 8px;
-            border: none;
+            padding: 0.65rem 1.25rem;
+            font-weight: 500;
+            border-radius: 6px;
+            border: 1px solid transparent;
             cursor: pointer;
-            font-size: 0.95rem;
-            transition: background 0.2s;
+            font-size: 0.9rem;
+            transition: all 0.2s;
         }
 
         .btn-primary {
-            background: var(--primary);
+            background: var(--accent);
             color: white;
+            border-color: var(--accent);
         }
-        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-primary:hover { background: var(--accent-hover); }
 
         .btn-danger {
-            background: #fee2e2;
-            color: var(--danger);
+            background: var(--danger-bg);
+            color: var(--danger-text);
+            border-color: #fecaca;
         }
-        .btn-danger:hover { background: #fecaca; }
+        .btn-danger:hover { background: #fee2e2; }
 
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
+        /* Countdown & Auto-detection HUD */
+        #countdown-container {
+            display: none;
+            text-align: center;
+            padding: 1.5rem;
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            background: #f1f5f9;
+            border-radius: 6px;
             margin-bottom: 1rem;
         }
 
-        @media (max-width: 640px) {
-            .form-row { grid-template-columns: 1fr; }
-        }
-
-        label {
-            display: block;
-            font-size: 0.9rem;
-            font-weight: 500;
-            margin-bottom: 0.4rem;
-            color: var(--text-main);
-        }
-
-        select {
-            width: 100%;
-            padding: 0.65rem;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            background: white;
-            font-size: 0.95rem;
-        }
-
-        /* Results Styling */
-        #results-container {
+        .auto-detection-hud {
             display: none;
-        }
-
-        .recommendation-card {
-            border-left: 4px solid var(--primary);
             background: #f8fafc;
-            padding: 1.5rem;
-            border-radius: 0 8px 8px 0;
-            margin-bottom: 1.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            font-size: 0.85rem;
         }
 
-        .recommendation-card h3 {
-            color: var(--primary);
-            font-size: 1.3rem;
+        .hud-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .hud-item {
+            background: white;
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .hud-label { color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        .hud-value { font-weight: 600; color: var(--text-main); margin-top: 0.1rem; }
+
+        /* Results */
+        #results-container { display: none; }
+        .recommendation-box {
+            border-left: 3px solid var(--accent);
+            padding-left: 1.25rem;
+        }
+
+        .recommendation-box h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-main);
             margin-bottom: 0.5rem;
         }
 
-        .logic-explanation {
-            margin-bottom: 1rem;
-            color: var(--text-main);
-        }
-
-        .viz-preview {
-            background: white;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 1rem;
-            text-align: center;
-            margin-top: 1rem;
-        }
-
-        .viz-preview svg {
-            max-width: 100%;
-            height: auto;
-        }
-
-        .viz-caption {
-            font-size: 0.85rem;
+        .rationale {
             color: var(--text-muted);
-            margin-top: 0.5rem;
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .viz-card {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 1.25rem;
+            text-align: center;
+        }
+
+        .viz-card svg { max-width: 100%; height: auto; }
+        .viz-caption {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 0.75rem;
             font-style: italic;
         }
     </style>
@@ -206,221 +216,216 @@
 <div class="container">
     <header>
         <h1>Statistical Test Recommender</h1>
-        <p>Zero-storage, client-side automated test selection and publication-ready visualization guide.</p>
-        <div class="badge-privacy">🔒 100% Private: Data stays in your browser memory only</div>
+        <p>Automated econometric and biostatistical test selector with zero server footprint.</p>
+        <div class="privacy-badge">🔒 100% Private: Processed in browser RAM only</div>
     </header>
 
-    <!-- Input Section -->
     <div class="card">
-        <h2>1. Provide Dataset</h2>
-        <label for="csv-input">Paste CSV Data (or upload file):</label>
-        <textarea id="csv-input" placeholder="group,score,age\nControl,85,22\nControl,88,24\nTreatment,92,23\nTreatment,95,25"></textarea>
-        
-        <div class="form-row">
-            <div>
-                <label for="iv-type">Independent Variable (IV) Type:</label>
-                <select id="iv-type">
-                    <option value="categorical">Categorical (Groups / Categories)</option>
-                    <option value="continuous">Continuous (Numeric Measurement)</option>
-                </select>
-            </div>
-            <div>
-                <label for="dv-type">Dependent Variable (DV) Type:</label>
-                <select id="dv-type">
-                    <option value="continuous">Continuous (Numeric Scale)</option>
-                    <option value="categorical">Categorical (Count / Frequency)</option>
-                </select>
+        <h2>1. Upload Dataset (.xlsx, .xls, .csv)</h2>
+        <div class="upload-zone">
+            <input type="file" id="dataset-file" accept=".xlsx, .xls, .csv" onchange="processFile(event)">
+        </div>
+
+        <!-- Auto-Detection HUD -->
+        <div id="hud" class="auto-detection-hud">
+            <strong>Automatically Detected Dataset Parameters:</strong>
+            <div class="hud-grid">
+                <div class="hud-item"><div class="hud-label">IV Type</div><div id="hud-iv" class="hud-value">-</div></div>
+                <div class="hud-item"><div class="hud-label">DV Type</div><div id="hud-dv" class="hud-value">-</div></div>
+                <div class="hud-item"><div class="hud-label">Groups / Levels</div><div id="hud-groups" class="hud-value">-</div></div>
+                <div class="hud-item"><div class="hud-label">Distribution</div><div id="hud-normality" class="hud-value">-</div></div>
             </div>
         </div>
 
-        <div class="form-row">
-            <div>
-                <label for="num-groups">Number of Groups / Levels:</label>
-                <select id="num-groups">
-                    <option value="2">2 Groups</option>
-                    <option value="3">3 or More Groups</option>
-                </select>
-            </div>
-            <div>
-                <label for="normality">Data Distribution (Normality):</label>
-                <select id="normality">
-                    <option value="normal">Normally Distributed</option>
-                    <option value="non-normal">Skewed / Non-Normal / Ordinal</option>
-                </select>
-            </div>
+        <!-- Countdown Timer HUD -->
+        <div id="countdown-container">
+            Analyzing dataset structures and normality... <span id="timer" style="font-weight: 600; color: var(--text-main);">3</span>s remaining
         </div>
 
         <div class="button-group">
-            <button class="btn-primary" onclick="analyzeData()">Analyze & Recommend Test</button>
+            <button class="btn-primary" onclick="runAnalysisWorkflow()">Generate Recommendations</button>
             <button class="btn-danger" onclick="clearDataset()">Clear Dataset</button>
         </div>
     </div>
 
-    <!-- Results Section -->
     <div id="results-container" class="card">
-        <h2>2. Recommended Statistical Test & Visualization</h2>
+        <h2>2. Recommended Statistical Test & Publication Visual</h2>
         <div id="recommendation-output"></div>
     </div>
 </div>
 
 <script>
-    function analyzeData() {
-        const csvText = document.getElementById('csv-input').value.trim();
-        const ivType = document.getElementById('iv-type').value;
-        const dvType = document.getElementById('dv-type').value;
-        const numGroups = document.getElementById('num-groups').value;
-        const normality = document.getElementById('normality').value;
+    let parsedDataRows = null;
+    let autoParams = { ivType: '', dvType: '', numGroups: '', normality: '' };
 
-        if (csvText === "") {
-            alert("Please paste or type sample data into the textarea first.");
+    function processFile(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const buffer = e.target.result;
+            if (file.name.endsWith('.csv')) {
+                const text = new TextDecoder().decode(buffer);
+                const result = Papa.parse(text, { header: true, dynamicTyping: true });
+                parsedDataRows = result.data.filter(row => Object.keys(row).length > 0);
+            } else {
+                const data = new Uint8Array(buffer);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const firstSheet = workbook.SheetNames[0];
+                parsedDataRows = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheet]);
+            }
+
+            // Perform automatic feature extraction
+            autoDetectParameters(parsedDataRows);
+        };
+
+        if (file.name.endsWith('.csv')) {
+            reader.readAsArrayBuffer(file);
+        } else {
+            reader.readAsArrayBuffer(file);
+        }
+    }
+
+    function autoDetectParameters(rows) {
+        if (!rows || rows.length === 0) return;
+        const columns = Object.keys(rows[0]);
+        if (columns.length < 2) {
+            alert("Dataset must contain at least 2 columns (Independent and Dependent variables).");
             return;
         }
 
-        // Parse CSV using PapaParse (purely in-memory)
-        const parsed = Papa.parse(csvText, { header: true, dynamicTyping: true });
-        console.log("Parsed rows in memory:", parsed.data.length);
+        const col1Key = columns[0]; // IV proxy
+        const col2Key = columns[1]; // DV proxy
 
+        // Analyze Column 1 (IV)
+        const col1Values = rows.map(r => r[col1Key]).filter(val => val !== null && val !== undefined);
+        const uniqueCol1 = [...new Set(col1Values)];
+        const isCol1Numeric = col1Values.every(val => typeof val === 'number');
+
+        if (!isCol1Numeric || uniqueCol1.length <= 10) {
+            autoParams.ivType = 'categorical';
+            autoParams.numGroups = uniqueCol1.length <= 2 ? '2' : '3+';
+        } else {
+            autoParams.ivType = 'continuous';
+            autoParams.numGroups = '2';
+        }
+
+        // Analyze Column 2 (DV)
+        const col2Values = rows.map(r => r[col2Key]).filter(val => typeof val === 'number');
+        const isCol2Numeric = col2Values.length > (rows.length * 0.7);
+
+        if (isCol2Numeric) {
+            autoParams.dvType = 'continuous';
+            
+            // Approximate Normality via simple skewness check
+            const mean = col2Values.reduce((a, b) => a + b, 0) / col2Values.length;
+            const variance = col2Values.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / col2Values.length;
+            const stdDev = Math.sqrt(variance);
+            const median = col2Values.sort((a,b)=>a-b)[Math.floor(col2Values.length/2)];
+            
+            // Non-parametric skew indicator (mean vs median difference relative to stdDev)
+            const skewIndicator = Math.abs(mean - median) / (stdDev || 1);
+            autoParams.normality = skewIndicator < 0.3 ? 'normal' : 'non-normal';
+        } else {
+            autoParams.dvType = 'categorical';
+            autoParams.normality = 'non-normal';
+        }
+
+        // Display HUD
+        document.getElementById('hud-iv').innerText = autoParams.ivType === 'categorical' ? 'Categorical (Groups)' : 'Continuous (Numeric)';
+        document.getElementById('hud-dv').innerText = autoParams.dvType === 'continuous' ? 'Continuous (Scale)' : 'Categorical (Count)';
+        document.getElementById('hud-groups').innerText = autoParams.ivType === 'categorical' ? `${autoParams.numGroups} Groups Detected` : 'N/A (Regression)';
+        document.getElementById('hud-normality').innerText = autoParams.normality === 'normal' ? 'Normally Distributed' : 'Skewed / Non-Normal';
+        document.getElementById('hud').style.display = 'block';
+    }
+
+    function runAnalysisWorkflow() {
+        if (!parsedDataRows) {
+            alert("Please upload an Excel or CSV file first.");
+            return;
+        }
+
+        const countdownEl = document.getElementById('countdown-container');
+        const timerEl = document.getElementById('timer');
+        countdownEl.style.display = 'block';
+        document.getElementById('results-container').style.display = 'none';
+
+        let timeLeft = 3;
+        timerEl.innerText = timeLeft;
+
+        const interval = setInterval(() => {
+            timeLeft--;
+            timerEl.innerText = timeLeft;
+            if (timeLeft <= 0) {
+                clearInterval(interval);
+                countdownEl.style.display = 'none';
+                generateRecommendationOutput();
+            }
+        }, 1000);
+    }
+
+    function generateRecommendationOutput() {
+        const { ivType, dvType, numGroups, normality } = autoParams;
         let testName = "";
         let rationale = "";
         let svgViz = "";
 
-        // Decision Tree Logic
         if (ivType === 'categorical' && dvType === 'continuous') {
             if (numGroups === '2') {
                 if (normality === 'normal') {
                     testName = "Independent Samples t-Test";
-                    rationale = "Your independent variable splits data into 2 distinct groups, and your dependent variable is continuous. Because the data is normally distributed, the parametric t-test provides the highest statistical power to compare group means.";
-                    svgViz = `
-                        <svg width="400" height="200" viewBox="0 0 400 200">
-                            <rect width="400" height="200" fill="#ffffff" rx="8"/>
-                            <!-- Boxplot Group 1 -->
-                            <line x1="120" y1="60" x2="120" y2="150" stroke="#64748b" stroke-width="2"/>
-                            <rect x="90" y="80" width="60" height="50" fill="#e0e7ff" stroke="#2563eb" stroke-width="2" rx="4"/>
-                            <line x1="90" y1="105" x2="150" y2="105" stroke="#1d4ed8" stroke-width="3"/>
-                            <!-- Boxplot Group 2 -->
-                            <line x1="280" y1="40" x2="280" y2="130" stroke="#64748b" stroke-width="2"/>
-                            <rect x="250" y="60" width="60" height="50" fill="#ccfbf1" stroke="#0d9488" stroke-width="2" rx="4"/>
-                            <line x1="250" y1="80" x2="310" y2="80" stroke="#0f766e" stroke-width="3"/>
-                            <!-- Labels -->
-                            <text x="120" y="175" text-anchor="middle" font-size="12" fill="#334155" font-family="Inter">Control Group</text>
-                            <text x="280" y="175" text-anchor="middle" font-size="12" fill="#334155" font-family="Inter">Treatment Group</text>
-                            <text x="200" y="25" text-anchor="middle" font-size="14" font-weight="600" fill="#1e293b" font-family="Inter">Publication-Ready Box Plot (t-Test)</text>
-                        </svg>`;
+                    rationale = "Auto-detection identified a categorical independent variable with 2 distinct groups and a continuous dependent variable with a normal distribution. The parametric t-Test maximizes statistical power.";
+                    svgViz = `<svg width="450" height="200" viewBox="0 0 450 200"><rect width="450" height="200" fill="#ffffff" rx="6"/><line x1="140" y1="50" x2="140" y2="150" stroke="#94a3b8" stroke-width="1.5"/><rect x="110" y="75" width="60" height="60" fill="#f1f5f9" stroke="#0f172a" stroke-width="1.5" rx="3"/><line x1="110" y1="105" x2="170" y2="105" stroke="#0f172a" stroke-width="2.5"/><line x1="310" y1="35" x2="310" y2="135" stroke="#94a3b8" stroke-width="1.5"/><rect x="280" y="55" width="60" height="60" fill="#f1f5f9" stroke="#0f172a" stroke-width="1.5" rx="3"/><line x1="280" y1="85" x2="340" y2="85" stroke="#0f172a" stroke-width="2.5"/><text x="140" y="175" text-anchor="middle" font-size="11" fill="#475569" font-family="Inter">Control (Group A)</text><text x="310" y="175" text-anchor="middle" font-size="11" fill="#475569" font-family="Inter">Treatment (Group B)</text></svg>`;
                 } else {
-                    testName = "Mann-Whitney U Test (Wilcoxon Rank-Sum)";
-                    rationale = "Your dependent variable is continuous with 2 groups, but the distribution is non-normal or ordinal. The Mann-Whitney U test evaluates differences in rank sums without assuming a normal distribution.";
-                    svgViz = `
-                        <svg width="400" height="200" viewBox="0 0 400 200">
-                            <rect width="400" height="200" fill="#ffffff" rx="8"/>
-                            <!-- Violin / Distribution curves -->
-                            <path d="M 90 140 Q 60 100 90 60 Q 120 100 90 140" fill="#e0e7ff" opacity="0.6"/>
-                            <circle cx="90" cy="100" r="5" fill="#2563eb"/>
-                            <path d="M 290 130 Q 250 90 290 50 Q 330 90 290 130" fill="#ccfbf1" opacity="0.6"/>
-                            <circle cx="290" cy="85" r="5" fill="#0d9488"/>
-                            <text x="90" y="175" text-anchor="middle" font-size="12" fill="#334155" font-family="Inter">Group A (Medians)</text>
-                            <text x="290" y="175" text-anchor="middle" font-size="12" fill="#334155" font-family="Inter">Group B (Medians)</text>
-                            <text x="200" y="25" text-anchor="middle" font-size="14" font-weight="600" fill="#1e293b" font-family="Inter">Violin Plot / Median Comparison</text>
-                        </svg>`;
+                    testName = "Mann-Whitney U Test";
+                    rationale = "Auto-detection identified 2 groups with continuous data displaying non-normal skewness. The Mann-Whitney U test evaluates rank sums without assuming normality.";
+                    svgViz = `<svg width="450" height="200" viewBox="0 0 450 200"><rect width="450" height="200" fill="#ffffff" rx="6"/><path d="M 140 145 Q 100 95 140 45 Q 180 95 140 145" fill="#f1f5f9" stroke="#0f172a" stroke-width="1.5"/><circle cx="140" cy="95" r="4" fill="#0f172a"/><path d="M 310 135 Q 270 85 310 35 Q 350 85 310 135" fill="#f1f5f9" stroke="#0f172a" stroke-width="1.5"/><circle cx="310" cy="85" r="4" fill="#0f172a"/><text x="140" y="175" text-anchor="middle" font-size="11" fill="#475569" font-family="Inter">Group A (Rank Median)</text><text x="310" y="175" text-anchor="middle" font-size="11" fill="#475569" font-family="Inter">Group B (Rank Median)</text></svg>`;
                 }
             } else {
                 if (normality === 'normal') {
-                    testName = "One-Way ANOVA (Analysis of Variance)";
-                    rationale = "You are comparing 3 or more independent groups on a continuous, normally distributed dependent variable. ANOVA evaluates whether at least one group mean differs significantly by analyzing variance ratios.";
-                    svgViz = `
-                        <svg width="400" height="200" viewBox="0 0 400 200">
-                            <rect width="400" height="200" fill="#ffffff" rx="8"/>
-                            <!-- 3 Bar Means with Error Bars -->
-                            <rect x="70" y="90" width="50" height="60" fill="#e0e7ff" rx="4"/>
-                            <line x1="95" y1="70" x2="95" y2="150" stroke="#1d4ed8" stroke-width="2"/>
-                            
-                            <rect x="175" y="50" width="50" height="100" fill="#bfdbfe" rx="4"/>
-                            <line x1="200" y1="35" x2="200" y2="150" stroke="#1d4ed8" stroke-width="2"/>
-
-                            <rect x="280" y="110" width="50" height="40" fill="#dbeafe" rx="4"/>
-                            <line x1="305" y1="95" x2="305" y2="150" stroke="#1d4ed8" stroke-width="2"/>
-
-                            <text x="95" y="175" text-anchor="middle" font-size="11" fill="#334155" font-family="Inter">Group 1</text>
-                            <text x="200" y="175" text-anchor="middle" font-size="11" fill="#334155" font-family="Inter">Group 2</text>
-                            <text x="305" y="175" text-anchor="middle" font-size="11" fill="#334155" font-family="Inter">Group 3</text>
-                            <text x="200" y="25" text-anchor="middle" font-size="14" font-weight="600" fill="#1e293b" font-family="Inter">Bar Chart with 95% Confidence Intervals</text>
-                        </svg>`;
+                    testName = "One-Way ANOVA";
+                    rationale = "Auto-detection found 3 or more independent groups with normally distributed continuous metrics. ANOVA analyzes variance ratios across group means.";
+                    svgViz = `<svg width="450" height="200" viewBox="0 0 450 200"><rect width="450" height="200" fill="#ffffff" rx="6"/><rect x="80" y="80" width="45" height="70" fill="#f1f5f9" stroke="#0f172a" stroke-width="1.5" rx="3"/><line x1="102" y1="60" x2="102" y2="150" stroke="#0f172a" stroke-width="1.5"/><rect x="202" y="50" width="45" height="100" fill="#f1f5f9" stroke="#0f172a" stroke-width="1.5" rx="3"/><line x1="224" y1="35" x2="224" y2="150" stroke="#0f172a" stroke-width="1.5"/><rect x="325" y="100" width="45" height="50" fill="#f1f5f9" stroke="#0f172a" stroke-width="1.5" rx="3"/><line x1="347" y1="80" x2="347" y2="150" stroke="#0f172a" stroke-width="1.5"/><text x="102" y="175" text-anchor="middle" font-size="11" fill="#475569" font-family="Inter">Group 1</text><text x="224" y="175" text-anchor="middle" font-size="11" fill="#475569" font-family="Inter">Group 2</text><text x="347" y="175" text-anchor="middle" font-size="11" fill="#475569" font-family="Inter">Group 3</text></svg>`;
                 } else {
                     testName = "Kruskal-Wallis H Test";
-                    rationale = "You have 3 or more groups with non-normal continuous data. The Kruskal-Wallis test serves as the non-equivalent non-parametric alternative to One-Way ANOVA.";
-                    svgViz = `
-                        <svg width="400" height="200" viewBox="0 0 400 200">
-                            <rect width="400" height="200" fill="#ffffff" rx="8"/>
-                            <circle cx="100" cy="110" r="25" fill="#e0e7ff" stroke="#2563eb"/>
-                            <circle cx="200" cy="70" r="30" fill="#bfdbfe" stroke="#2563eb"/>
-                            <circle cx="300" cy="130" r="20" fill="#dbeafe" stroke="#2563eb"/>
-                            <text x="200" y="25" text-anchor="middle" font-size="14" font-weight="600" fill="#1e293b" font-family="Inter">Rank-Order Distribution Spread</text>
-                        </svg>`;
+                    rationale = "Auto-detection confirmed 3+ groups with non-normal data distributions. Kruskal-Wallis serves as the non-parametric equivalent to ANOVA.";
+                    svgViz = `<svg width="450" height="200" viewBox="0 0 450 200"><rect width="450" height="200" fill="#ffffff" rx="6"/><circle cx="110" cy="100" r="25" fill="#f1f5f9" stroke="#0f172a" stroke-width="1.5"/><circle cx="225" cy="70" r="30" fill="#f1f5f9" stroke="#0f172a" stroke-width="1.5"/><circle cx="340" cy="115" r="20" fill="#f1f5f9" stroke="#0f172a" stroke-width="1.5"/><text x="225" y="175" text-anchor="middle" font-size="11" fill="#475569" font-family="Inter">Non-Parametric Rank Spread Across Groups</text></svg>`;
                 }
             }
         } else if (ivType === 'categorical' && dvType === 'categorical') {
             testName = "Chi-Square Test of Independence";
-            rationale = "Both your independent and dependent variables are categorical (frequency counts). The Chi-Square test determines whether there is a significant association between the two categorical variables.";
-            svgViz = `
-                <svg width="400" height="200" viewBox="0 0 400 200">
-                    <rect width="400" height="200" fill="#ffffff" rx="8"/>
-                    <!-- Stacked Bar Chart -->
-                    <rect x="100" y="60" width="70" height="90" fill="#93c5fd" rx="4"/>
-                    <rect x="100" y="60" width="70" height="40" fill="#2563eb" rx="4"/>
-
-                    <rect x="230" y="80" width="70" height="70" fill="#93c5fd" rx="4"/>
-                    <rect x="230" y="80" width="70" height="20" fill="#2563eb" rx="4"/>
-
-                    <text x="135" y="175" text-anchor="middle" font-size="11" fill="#334155" font-family="Inter">Category A</text>
-                    <text x="265" y="175" text-anchor="middle" font-size="11" fill="#334155" font-family="Inter">Category B</text>
-                    <text x="200" y="25" text-anchor="middle" font-size="14" font-weight="600" fill="#1e293b" font-family="Inter">Stacked Proportional Bar Chart</text>
-                </svg>`;
+            rationale = "Auto-detection recognized categorical frequency distributions for both variables. Chi-Square tests categorical association.";
+            svgViz = `<svg width="450" height="200" viewBox="0 0 450 200"><rect width="450" height="200" fill="#ffffff" rx="6"/><rect x="110" y="50" width="70" height="100" fill="#e2e8f0" rx="3"/><rect x="110" y="50" width="70" height="40" fill="#0f172a" rx="3"/><rect x="270" y="70" width="70" height="80" fill="#e2e8f0" rx="3"/><rect x="270" y="70" width="70" height="25" fill="#0f172a" rx="3"/><text x="145" y="175" text-anchor="middle" font-size="11" fill="#475569" font-family="Inter">Category A Frequencies</text><text x="305" y="175" text-anchor="middle" font-size="11" fill="#475569" font-family="Inter">Category B Frequencies</text></svg>`;
         } else {
-            testName = "Simple Linear / Multiple Regression";
-            rationale = "Your independent and dependent variables are continuous. Regression models the linear relationship and predictive capacity of independent predictors on the outcome variable.";
-            svgViz = `
-                <svg width="400" height="200" viewBox="0 0 400 200">
-                    <rect width="400" height="200" fill="#ffffff" rx="8"/>
-                    <line x1="50" y1="160" x2="350" y2="160" stroke="#cbd5e1" stroke-width="2"/>
-                    <line x1="50" y1="40" x2="50" y2="160" stroke="#cbd5e1" stroke-width="2"/>
-                    <!-- Scatter points -->
-                    <circle cx="80" cy="130" r="4" fill="#2563eb"/><circle cx="120" cy="110" r="4" fill="#2563eb"/>
-                    <circle cx="170" cy="95" r="4" fill="#2563eb"/><circle cx="220" cy="75" r="4" fill="#2563eb"/>
-                    <circle cx="280" cy="60" r="4" fill="#2563eb"/><circle cx="320" cy="50" r="4" fill="#2563eb"/>
-                    <!-- Trendline -->
-                    <line x1="60" y1="140" x2="340" y2="45" stroke="#dc2626" stroke-width="2" stroke-dasharray="4"/>
-                    <text x="200" y="25" text-anchor="middle" font-size="14" font-weight="600" fill="#1e293b" font-family="Inter">Scatter Plot with OLS Regression Line</text>
-                </svg>`;
+            testName = "Ordinary Least Squares (OLS) Regression";
+            rationale = "Auto-detection confirmed continuous measurements across variables, suitable for modeling linear predictive dependencies.";
+            svgViz = `<svg width="450" height="200" viewBox="0 0 450 200"><rect width="450" height="200" fill="#ffffff" rx="6"/><line x1="50" y1="160" x2="400" y2="160" stroke="#cbd5e1" stroke-width="1.5"/><line x1="50" y1="30" x2="50" y2="160" stroke="#cbd5e1" stroke-width="1.5"/><circle cx="90" cy="130" r="3.5" fill="#0f172a"/><circle cx="150" cy="110" r="3.5" fill="#0f172a"/><circle cx="210" cy="90" r="3.5" fill="#0f172a"/><circle cx="280" cy="65" r="3.5" fill="#0f172a"/><circle cx="350" cy="45" r="3.5" fill="#0f172a"/><line x1="70" y1="140" x2="380" y2="40" stroke="#0f172a" stroke-width="2" stroke-dasharray="4"/><text x="225" y="190" text-anchor="middle" font-size="11" fill="#475569" font-family="Inter">Regression Fit Line & Observations</text></svg>`;
         }
 
-        // Render Results
-        const outputHtml = `
-            <div class="recommendation-card">
+        const html = `
+            <div class="recommendation-box">
                 <h3>${testName}</h3>
-                <p class="logic-explanation"><strong>Why this test fits your dataset:</strong> ${rationale}</p>
-                <div class="viz-preview">
+                <p class="rationale"><strong>Auto-Analysis Rationale:</strong> ${rationale}</p>
+                <div class="viz-card">
                     ${svgViz}
-                    <div class="viz-caption">Figure 1. Example of a publication-ready graphical representation suitable for ${testName}.</div>
+                    <div class="viz-caption">Figure 1. Publication-ready graphical representation template for ${testName}.</div>
                 </div>
             </div>
         `;
 
-        document.getElementById('recommendation-output').innerHTML = outputHtml;
+        document.getElementById('recommendation-output').innerHTML = html;
         document.getElementById('results-container').style.display = 'block';
     }
 
     function clearDataset() {
-        // Purge textarea and reset form inputs
-        document.getElementById('csv-input').value = '';
-        document.getElementById('iv-type').selectedIndex = 0;
-        document.getElementById('dv-type').selectedIndex = 0;
-        document.getElementById('num-groups').selectedIndex = 0;
-        document.getElementById('normality').selectedIndex = 0;
-        
-        // Hide and clear results
+        parsedDataRows = null;
+        document.getElementById('dataset-file').value = '';
+        document.getElementById('hud').style.display = 'none';
+        document.getElementById('countdown-container').style.display = 'none';
         document.getElementById('results-container').style.display = 'none';
         document.getElementById('recommendation-output').innerHTML = '';
-        
-        alert("Dataset successfully cleared from browser memory.");
+        alert("Dataset successfully purged from browser memory.");
     }
 </script>
 
